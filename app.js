@@ -108,7 +108,6 @@ const EMPTY_STATE_HTML = `
   <div class="empty-state">
     <div class="ember">🔥</div>
     <p>Our Exclusive AI Finds You the Right Cigar from our Humidor</p>
-    <p>Our exclusive AI will find the right cigar from our humidor.</p>
     <div class="hint-chips">
       <span class="hint-chip" data-query="spicy and full body">Spicy &amp; Full-Bodied</span>
       <span class="hint-chip" data-query="creamy and smooth mild">Creamy &amp; Smooth</span>
