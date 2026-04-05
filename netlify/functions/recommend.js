@@ -787,6 +787,16 @@ exports.handler = async function (event) {
         .map(({ c }) => c);
     }
 
+    // Deduplicate by brand — keep only the highest-scoring cigar per brand
+    // so recommendation cards never show two cigars from the same maker.
+    const seenBrands = new Set();
+    pool = pool.filter(c => {
+      const brand = norm(c.brand);
+      if (seenBrands.has(brand)) return false;
+      seenBrands.add(brand);
+      return true;
+    });
+
     // Pre-filter to top 20 candidates for GPT — broad enough for nuance,
     // small enough to keep tokens low and latency fast
     let candidates = pool.slice(0, 20);
