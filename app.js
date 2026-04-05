@@ -322,7 +322,7 @@ async function handleSearch(e) {
   }
 
   resetForQuery(query);
-  showEmptyState();
+  resultsEl.innerHTML = '';
   clearBtn.style.display = 'inline-flex';
 
   const all = await fetchRecommendations('AI is finding your best matches…');
