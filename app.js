@@ -224,7 +224,7 @@ function setLoading(v) {
   const submit = form.querySelector('button[type="submit"]');
   if (submit) {
     submit.disabled = v;
-    submit.textContent = v ? 'AI thinking…' : 'Get Recs';
+    submit.textContent = v ? 'AI thinking…' : 'Find My Cigar';
   }
   queryInput.disabled = v;
   syncButtons();
