@@ -107,7 +107,7 @@ function setStatus(msg, { persistent = false } = {}) {
 const EMPTY_STATE_HTML = `
   <div class="empty-state">
     <div class="ember">🔥</div>
-    <p>Enter a brand, flavor, or what you're drinking.</p>
+    <p>Tell us a brand, flavor, or drink — we'll find your next great smoke.</p>
     <p>Our exclusive AI will find the right cigar from our humidor.</p>
     <div class="hint-chips">
       <span class="hint-chip" data-query="spicy and full body">Spicy &amp; Full-Bodied</span>
