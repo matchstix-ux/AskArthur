@@ -223,7 +223,7 @@ function setLoading(v) {
   const submit = form.querySelector('button[type="submit"]');
   if (submit) {
     submit.disabled = v;
-    submit.textContent = v ? 'AI thinking…' : 'Find My Cigar';
+    submit.textContent = v ? 'Arthur is getting your recommendations…' : 'Find My Cigar';
   }
   queryInput.disabled = v;
   syncButtons();
@@ -250,7 +250,7 @@ async function fetchRecommendations(statusMsg) {
   abortInflight();
   state.abortController = new AbortController();
   setLoading(true);
-  setStatus(statusMsg || 'AI is selecting your best matches…', { persistent: true });
+  setStatus(statusMsg || 'Arthur is getting your recommendations…', { persistent: true });
 
   try {
     const payload = {
@@ -323,7 +323,7 @@ async function handleSearch(e) {
   resultsEl.innerHTML = '';
   clearBtn.style.display = 'inline-flex';
 
-  const all = await fetchRecommendations('AI is finding your best matches…');
+  const all = await fetchRecommendations('Arthur is getting your recommendations…');
   if (!all || !all.length) {
     setStatus('No recommendations found — try a different search.', { persistent: true });
     return;
