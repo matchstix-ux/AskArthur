@@ -149,6 +149,7 @@ function renderCigar(cigar, index) {
 
   return `
     <article class="card" data-index="${index}" data-key="${escapeHtml(key)}">
+      ${cigar.image ? `<div class="card-img"><img src="${escapeHtml(cigar.image)}" alt="${escapeHtml(cigar.name)}" loading="lazy" onerror="this.closest('.card-img').style.display='none'" /></div>` : ""}
       <div class="card-name">${escapeHtml(cigar.name)}</div>
       <div class="card-brand">${escapeHtml(cigar.brand)}</div>
 
