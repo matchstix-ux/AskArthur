@@ -311,6 +311,17 @@
       color: var(--accent);
     }
     .actions button:disabled { opacity: 0.45; cursor: default; }
+    .btn-share {
+      background: transparent;
+      border: 1px solid var(--muted);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-share:hover { color: var(--text); border-color: var(--text); }
     .btn-buy {
       flex: 1;
       padding: 8px;
