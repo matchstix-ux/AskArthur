@@ -183,7 +183,6 @@ function renderCigar(cigar, index) {
         <button type="button" class="dislike" title="Replace this recommendation">
           👎 Replace
         </button>
-        <button type="button" class="btn-share" onclick="sharePicks()" title="Share these picks">🔗 Share</button>
         <a class="btn-buy"
            href="https://www.famous-smoke.com/catalogsearch/result/?q=${encodeURIComponent(cigar.name)}"
            target="_blank"
@@ -196,11 +195,14 @@ function renderCigar(cigar, index) {
 }
 
 function renderResults() {
-  if (!state.currentResults.length) { if (!loadPicksFromUrl()) showEmptyState(); return; }
-  resultsEl.innerHTML = `<div class="grid">${
-    state.currentResults.map((c, i) => renderCigar(c, i)).join('')
-  }</div>`;
+  if (!state.currentResults.length) { showEmptyState(); return; }
+  resultsEl.innerHTML =
+    `<div class="grid">${state.currentResults.map((c, i) => renderCigar(c, i)).join('')}</div>
+     <div class="share-row">
+       <button type="button" class="btn-share" id="shareBtn">🔗 Share My Picks</button>
+     </div>`;
   syncButtons();
+  document.getElementById('shareBtn')?.addEventListener('click', sharePicks);
 }
 
 function updateCardAt(index) {
