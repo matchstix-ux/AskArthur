@@ -813,6 +813,16 @@ exports.handler = async function (event) {
       candidates = candidates.concat(backup).slice(0, 20);
     }
 
+    // Special case: 'new to cigars' — force 2 mild + 1 mild/medium
+    const isNewToCigars = queryLower.includes('new to cigar') || queryLower.includes('new to cigars') || queryLower.includes('approachable');
+    if (isNewToCigars) {
+      const mildPool    = shuffle(ALL_CIGARS.filter(c => c.strength <= 5 && !excluded.has(getCigarKey(c))));
+      const midPool     = shuffle(ALL_CIGARS.filter(c => c.strength === 6 && !excluded.has(getCigarKey(c))));
+      const mildPicks   = mildPool.slice(0, 2);
+      const midPick     = midPool.slice(0, 1);
+      candidates        = [...mildPicks, ...midPick];
+    }
+
     // GPT selects the best 6 from the 20 candidates and writes a why for each.
     // Falls back to top-6 scorer results with no why if AI is unavailable.
     const { results } = await aiSelectAndExplain(rawQuery || 'cigar recommendation', candidates);
