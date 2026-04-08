@@ -142,7 +142,6 @@ function renderCigar(cigar, index) {
   const key       = getCigarKey(cigar);
   const liked     = state.liked.has(key);
   const pct       = strengthPercent(cigar.strength);
-  const color     = strengthColor(cigar.strength);
   const label     = strengthLabel(cigar.strength);
   const notes     = Array.isArray(cigar.flavorNotes)
     ? cigar.flavorNotes.map(escapeHtml).join(', ')
@@ -156,8 +155,8 @@ function renderCigar(cigar, index) {
       <div class="card-brand">${escapeHtml(cigar.brand)}</div>
 
       <div class="card-meta">
-        ${price ? `<span class="price-badge">${price}</button>` : ''}
-        <span>${escapeHtml(label)}</button>
+        ${price ? `<span class="price-badge">${price}</span>` : ''}
+        <span>${escapeHtml(label)}</span>
       </div>
 
       <div class="strength-wrap">
@@ -184,7 +183,7 @@ function renderCigar(cigar, index) {
           👎 Replace
         </button>
         <a class="btn-buy"
-           href="https://www.famous-smoke.com/catalogsearch/result/?q=${encodeURIComponent(cigar.name)}"
+           href="${encodeURIComponent(cigar.name)}"
            target="_blank"
            rel="noopener noreferrer"
            title="Find at Famous Smoke Shop">
@@ -302,7 +301,6 @@ function resetForQuery(query) {
   state.currentQuery   = query;
   state.currentResults = [];
   state.buffer         = [];
-  state.liked.clear();
   state.disliked.clear();
   state.seen.clear();
 }
@@ -411,7 +409,6 @@ function handleClear() {
   state.currentQuery   = '';
   state.currentResults = [];
   state.buffer         = [];
-  state.liked.clear();
   state.disliked.clear();
   state.seen.clear();
   saveLikedToStorage(state.liked);
