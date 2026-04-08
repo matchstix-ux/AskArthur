@@ -250,7 +250,7 @@ async function fetchRecommendations(statusMsg) {
   abortInflight();
   state.abortController = new AbortController();
   setLoading(true);
-  setStatus(statusMsg || 'Arthur is selecting your cigars…', { persistent: true });
+  setStatus('', { persistent: false });
 
   try {
     const payload = {
@@ -323,7 +323,7 @@ async function handleSearch(e) {
   resultsEl.innerHTML = '';
   clearBtn.style.display = 'inline-flex';
 
-  const all = await fetchRecommendations('Arthur is selecting your cigars…');
+  const all = await fetchRecommendations();
   if (!all || !all.length) {
     setStatus('No recommendations found — try a different search.', { persistent: true });
     return;
