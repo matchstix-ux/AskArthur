@@ -158,12 +158,12 @@ function renderCigar(cigar, index) {
       </div>
 
       <div class="strength-wrap">
-        <span>Mild</button>
+        <span class="strength-label">Mild</span>
         <div class="strength-track">
           <div class="strength-fill"
-               style="width:${pct}%; background:${color}"></div>
+               style="width:${pct}%; background: linear-gradient(to right, var(--strength-low), var(--strength-med), var(--strength-high))"></div>
         </div>
-        <span>Strong</button>
+        <span class="strength-label">Strong</span>
       </div>
 
       <div class="card-notes">
