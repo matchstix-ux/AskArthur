@@ -183,6 +183,7 @@ function renderCigar(cigar, index) {
         <button type="button" class="dislike" title="Replace this recommendation">
           👎 Replace
         </button>
+        <button type="button" class="btn-share" onclick="sharePicks()" title="Share these picks">🔗 Share</button>
         <a class="btn-buy"
            href="https://www.famous-smoke.com/catalogsearch/result/?q=${encodeURIComponent(cigar.name)}"
            target="_blank"
@@ -195,7 +196,7 @@ function renderCigar(cigar, index) {
 }
 
 function renderResults() {
-  if (!state.currentResults.length) { showEmptyState(); return; }
+  if (!state.currentResults.length) { if (!loadPicksFromUrl()) showEmptyState(); return; }
   resultsEl.innerHTML = `<div class="grid">${
     state.currentResults.map((c, i) => renderCigar(c, i)).join('')
   }</div>`;
@@ -420,7 +421,36 @@ function handleClear() {
   queryInput.value = '';
   clearBtn.style.display = 'none';
   setStatus('');
-  showEmptyState();
+  if (!loadPicksFromUrl()) showEmptyState();
+}
+
+// ---------------------------------------------------------------------------
+// Share My Picks
+// ---------------------------------------------------------------------------
+
+function sharePicks() {
+  if (!state.currentResults.length) return;
+  const payload = btoa(unescape(encodeURIComponent(JSON.stringify(state.currentResults))));
+  const url = window.location.origin + window.location.pathname + '?picks=' + payload;
+  navigator.clipboard.writeText(url).then(() => {
+    setStatus('Link copied — share it with a friend!', { persistent: true });
+  }).catch(() => {
+    prompt('Copy this link:', url);
+  });
+}
+
+function loadPicksFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const raw = params.get('picks');
+  if (!raw) return false;
+  try {
+    const picks = JSON.parse(decodeURIComponent(escape(atob(raw))));
+    if (!Array.isArray(picks) || !picks.length) return false;
+    state.currentResults = picks;
+    renderResults();
+    setStatus("Viewing someone's picks — search anytime to get your own.", { persistent: true });
+    return true;
+  } catch (e) { return false; }
 }
 
 // ---------------------------------------------------------------------------
@@ -447,4 +477,4 @@ resultsEl.addEventListener('click', async e => {
 // Init
 // ---------------------------------------------------------------------------
 
-showEmptyState();
+if (!loadPicksFromUrl()) showEmptyState();
