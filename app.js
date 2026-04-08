@@ -117,6 +117,7 @@ const EMPTY_STATE_HTML = `
       <button type="button" class="hint-chip" data-query="espresso coffee">Pairs with Espresso</button>
       <button type="button" class="hint-chip" data-query="ribeye steak dinner">Pairs with Steak</button>
       <button type="button" class="hint-chip" data-query="gift for cigar lover who smokes premium">Premium Gift</button>
+      <button type="button" class="hint-chip" data-query="budget under 10 dollars cheap affordable">Under $10</button>
     </div>
   </div>`;
 
