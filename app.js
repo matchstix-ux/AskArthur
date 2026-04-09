@@ -327,15 +327,37 @@ function renderTasteProfile() {
         ${priceStr ? `<span class="taste-tag taste-tag-price">${escapeHtml(profile.topPrice)}</span>` : ''}
       </span>
       <span class="taste-count">${profile.count} liked</span>
+      <button type="button" class="taste-reset" title="Clear taste profile and start fresh">Reset</button>
     </div>`;
 
   if (panel) {
     panel.outerHTML = html;
   } else {
-    // Insert just above the results section
     const anchor = document.getElementById('results');
     anchor.insertAdjacentHTML('beforebegin', html);
   }
+
+  // Bind reset button after insertion
+  document.getElementById(panelId)
+    ?.querySelector('.taste-reset')
+    ?.addEventListener('click', clearTasteProfile);
+}
+
+function clearTasteProfile() {
+  // Wipe liked cigars and persistent dislikes from storage and state
+  try { localStorage.removeItem(LIKED_CIGARS_KEY); } catch {}
+  state.liked.clear();
+  saveLikedToStorage(state.liked);
+  state.dislikedPersistent.clear();
+  saveDislikedToStorage(state.dislikedPersistent);
+
+  // Remove panel from DOM
+  document.getElementById('taste-profile-panel')?.remove();
+
+  // Re-render cards so Like/Not-for-me states update visually
+  if (state.currentResults.length) renderResults();
+
+  setStatus('Taste profile cleared — starting fresh.');
 }
 
 function renderResults() {

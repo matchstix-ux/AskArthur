@@ -478,7 +478,22 @@
       color: var(--muted);
       font-size: 0.78rem;
       white-space: nowrap;
+    }
+    .taste-reset {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      cursor: pointer;
+      white-space: nowrap;
       margin-left: auto;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .taste-reset:hover {
+      color: var(--text);
+      border-color: var(--muted);
     }
     .btn-buy {
       flex: 1;
