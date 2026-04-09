@@ -447,26 +447,59 @@
     .smoke-wrap {
       position: relative;
       width: 140px;
-      height: 140px;
+      height: 160px;
     }
     .puff {
       position: absolute;
       border-radius: 50%;
-      background: transparent;
-      border: 4px solid rgba(200,168,75,0.7);
-      animation: ring-rise 2.4s ease-out infinite;
-      bottom: 0;
       left: 50%;
+      filter: blur(12px);
+      animation: puff-rise 3s ease-in-out infinite;
       transform: translateX(-50%) scale(0);
     }
-    .puff-1 { width: 60px;  height: 36px;  animation-delay: 0s;    border-width: 4px; }
-    .puff-2 { width: 88px;  height: 52px;  animation-delay: 0.8s;  border-width: 3px; }
-    .puff-3 { width: 44px;  height: 26px;  animation-delay: 1.6s;  border-width: 3px; }
-    @keyframes ring-rise {
-      0%   { transform: translateX(-50%) scale(0.2) rotateX(70deg); opacity: 0;   bottom: 0; }
-      15%  { opacity: 0.9; }
-      60%  { opacity: 0.5; }
-      100% { transform: translateX(-50%) scale(2.2) rotateX(70deg); opacity: 0;   bottom: 110px; }
+    /* Three puffs of slightly different sizes and horizontal drift */
+    .puff-1 {
+      width: 72px; height: 72px;
+      background: radial-gradient(circle at 40% 40%, rgba(220,210,200,0.82), rgba(180,170,160,0.0) 70%);
+      bottom: 10px;
+      animation-delay: 0s;
+    }
+    .puff-2 {
+      width: 90px; height: 90px;
+      background: radial-gradient(circle at 55% 38%, rgba(210,200,190,0.75), rgba(170,160,150,0.0) 70%);
+      bottom: 10px;
+      animation-delay: 1s;
+    }
+    .puff-3 {
+      width: 60px; height: 60px;
+      background: radial-gradient(circle at 45% 42%, rgba(225,215,205,0.78), rgba(185,175,165,0.0) 70%);
+      bottom: 10px;
+      animation-delay: 2s;
+    }
+    @keyframes puff-rise {
+      0%   {
+        transform: translateX(-50%) scale(0.3);
+        opacity: 0;
+        bottom: 10px;
+        margin-left: 0px;
+      }
+      15%  { opacity: 1; }
+      50%  {
+        transform: translateX(-50%) scale(1.1);
+        opacity: 0.7;
+        margin-left: 8px;
+      }
+      80%  {
+        transform: translateX(-50%) scale(1.5);
+        opacity: 0.25;
+        margin-left: -6px;
+      }
+      100% {
+        transform: translateX(-50%) scale(1.8);
+        opacity: 0;
+        bottom: 130px;
+        margin-left: 4px;
+      }
     }
 
     /* ── Arthur error state ── */
