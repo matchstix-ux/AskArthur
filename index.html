@@ -85,6 +85,11 @@
       white-space: nowrap;
       flex-shrink: 0;
       margin-left: 8px;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .topbar-tag:hover {
+      color: var(--accent-2);
     }
 
     /* ── Layout ── */
@@ -105,6 +110,15 @@
     .hero p {
       color: var(--muted);
       font-size: 0.95rem;
+    }
+    .hero-arthur {
+      margin-top: 4px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+    .hero-arthur strong {
+      color: var(--accent);
+      font-weight: 700;
     }
 
     /* ── Search panel ── */
@@ -201,8 +215,85 @@
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     }
 
+    /* ── About Arthur ── */
+    .about {
+      margin-top: 56px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      scroll-margin-top: 70px;
+    }
+    .about h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .about h2::before {
+      content: '';
+    }
+    .about-intro {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      max-width: 600px;
+      margin: 0 auto 28px;
+    }
+    .about-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .about-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .about-icon {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+    .about-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .about-card p {
+      font-size: 0.87rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .about-details {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .about-details p {
+      margin-bottom: 10px;
+    }
+    .about-details strong {
+      color: var(--text);
+    }
+
+    /* ── Tablet overrides ── */
+    @media (max-width: 768px) and (min-width: 521px) {
+      .wrap { padding: 20px 16px 48px; }
+
+      .hero h1 { font-size: 1.5rem; }
+
+      .grid { grid-template-columns: 1fr; gap: 12px; }
+
+      .topbar-since { display: none; }
+
+      .about-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
     /* ── Mobile overrides ── */
-    @media (max-width: 768px) {
+    @media (max-width: 520px) {
       .wrap { padding: 20px 12px 48px; }
 
       .hero h1 { font-size: 1.4rem; }
@@ -216,6 +307,10 @@
       .grid { grid-template-columns: 1fr; gap: 12px; }
 
       .topbar-since { display: none; }
+
+      .hint-chips { padding: 0 4px; }
+
+      .about-grid { grid-template-columns: 1fr; }
     }
 
     /* ── Cards ── */
@@ -357,19 +452,19 @@
 <body>
 
   <!-- Top bar -->
-  <div class="topbar">
-    <div class="topbar-brand">
+  <header class="topbar" role="banner">
+    <nav class="topbar-brand" aria-label="Main navigation">
       <a href="/" class="topbar-logo" aria-label="Reset"><span>famous</span> cigars</a>
       <div class="topbar-since">Since 1939</div>
-    </div>
-    <div class="topbar-tag">AI Cigar Sommelier</div>
-  </div>
+    </nav>
+    <a href="#about-arthur" class="topbar-tag">AI Cigar Sommelier</a>
+  </header>
 
-  <div class="wrap">
+  <main class="wrap">
 
     <div class="hero">
       <h1>Find Your <span>Perfect Smoke</span></h1>
-
+      <p class="hero-arthur">Meet <strong>Arthur</strong>, your AI cigar sommelier</p>
     </div>
 
     <section class="panel">
@@ -388,11 +483,46 @@
 
     <div id="results" aria-live="polite" aria-atomic="false"></div>
 
-    <footer>
+    <!-- About Arthur -->
+    <section id="about-arthur" class="about">
+      <h2>Meet Arthur, Your AI Cigar Sommelier</h2>
+      <p class="about-intro">Arthur is the smartest guy in the humidor. Tell him what you like, and he'll pull three cigars from the Famous Smoke Shop collection that fit your taste.</p>
+
+      <div class="about-grid">
+        <div class="about-card">
+          <div class="about-icon">🔖</div>
+          <h3>Know what you like?</h3>
+          <p>Give Arthur a brand or a cigar you already enjoy, and he'll find you something in the same neighborhood — or stretch your palate with something new.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">🎯</div>
+          <h3>Not sure where to start?</h3>
+          <p>Describe a flavor profile. Creamy and smooth. Spicy with some kick. Earthy and full-bodied. Arthur speaks the language and knows what to reach for.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">🥃</div>
+          <h3>Pairing something?</h3>
+          <p>Tell him what you're drinking or eating. Bourbon, espresso, a steak dinner — Arthur will match a cigar to the occasion.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">💰</div>
+          <h3>Shopping with a budget?</h3>
+          <p>Whether you want an everyday smoke under ten bucks or a premium stick worth the splurge, Arthur stays in your price range.</p>
+        </div>
+      </div>
+
+      <div class="about-details">
+        <p>Every recommendation comes with tasting notes, strength, price, and a quick explanation of why that cigar fits what you asked for. Like what you see? Hit Buy and you're on the Famous Smoke Shop product page. Want a different option? Hit Replace and Arthur will swap in a fresh pick.</p>
+        <p>Arthur remembers what you like. When you heart a cigar, he keeps it in mind for next time — so your recommendations get sharper the more you use him.</p>
+        <p><strong>No account needed. No quiz to fill out.</strong> Just tell Arthur what you're in the mood for, and let him do the digging.</p>
+      </div>
+    </section>
+
+    <footer role="contentinfo">
       <p>Powered by Famous Smoke Shop · <a href="https://www.famous-smoke.com" target="_blank">famous-smoke.com</a> · Since 1939</p>
     </footer>
 
-  </div>
+  </main>
 
   <script src="app.js"></script>
 </body>
