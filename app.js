@@ -577,3 +577,4 @@ resultsEl.addEventListener('click', async e => {
 // ---------------------------------------------------------------------------
 
 showEmptyState();
+syncRecapDrawer();
