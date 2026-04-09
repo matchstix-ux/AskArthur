@@ -423,8 +423,11 @@ async function handleSearch(e) {
   }
 
   // First 3 go on screen, rest go into the replace buffer
-  state.currentResults = all.slice(0, 3);
-  state.buffer         = all.slice(3);
+  // Strip any persistent dislikes from both (API should already exclude them,
+  // but guard client-side too so stale buffer entries never surface)
+  const clean = all.filter(c => !state.dislikedPersistent.has(getCigarKey(c)));
+  state.currentResults = clean.slice(0, 3);
+  state.buffer         = clean.slice(3);
   rememberSeen(all);
   renderResults();
   setStatus('');
@@ -443,6 +446,7 @@ async function handleReplace(index) {
   const bufferMatch = state.buffer.findIndex(c => {
     const k = getCigarKey(c);
     return !state.disliked.has(k) &&
+           !state.dislikedPersistent.has(k) &&
            !state.currentResults.some(cur => getCigarKey(cur) === k);
   });
 
@@ -471,9 +475,10 @@ async function handleReplace(index) {
     return;
   }
 
-  // Refill buffer with leftovers
+  // Refill buffer with leftovers — exclude persistent dislikes
   state.buffer = all.filter(c => getCigarKey(c) !== getCigarKey(replacement) &&
-                                  !existingKeys.has(getCigarKey(c)));
+                                  !existingKeys.has(getCigarKey(c)) &&
+                                  !state.dislikedPersistent.has(getCigarKey(c)));
   state.currentResults[index] = replacement;
   rememberSeen([replacement, ...state.buffer]);
   updateCardAt(index);
