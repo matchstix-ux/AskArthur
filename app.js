@@ -215,10 +215,10 @@ function renderCigar(cigar, index) {
                 title="${liked ? 'Remove like' : 'Like this cigar'}">
           ${liked ? '❤️ Liked' : '👍 Like'}
         </button>
-        <button type="button" class="not-for-me ${notForMe ? 'active' : ''}"
+        <button type="button" class="not-for-me${notForMe ? ' active' : ''}"
                 aria-pressed="${notForMe}"
-                title="Not for me — Arthur won't recommend this again">
-          ${notForMe ? '🚫 Not for me' : '🚫 Not for me'}
+                title="Not for me — Arthur won’t recommend this again">
+          ${notForMe ? '✕ Not for me' : '🚫 Not for me'}
         </button>
         <button type="button" class="dislike" title="Swap for a different recommendation">
           🔄 Replace
