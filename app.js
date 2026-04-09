@@ -503,6 +503,42 @@ function handleLike(index) {
   }
   saveLikedToStorage(state.liked);
   updateCardAt(index);
+  checkAllLiked();
+}
+
+function checkAllLiked() {
+  if (state.currentResults.length !== 3) return;
+  const allLiked = state.currentResults.every(c => state.liked.has(getCigarKey(c)));
+  if (!allLiked) return;
+
+  // Build a tighter profile query from the 3 liked cigars specifically
+  const freq = {};
+  state.currentResults.forEach(c => {
+    (c.flavorNotes || []).forEach(f => {
+      const k = f.toLowerCase().trim();
+      freq[k] = (freq[k] || 0) + 1;
+    });
+  });
+  const topNotes = Object.entries(freq)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([f]) => f);
+
+  const avgStrength = state.currentResults
+    .reduce((s, c) => s + (Number(c.strength) || 6), 0) / 3;
+  const strengthHint = avgStrength >= 8 ? 'full body bold'
+    : avgStrength >= 6 ? 'medium body' : 'mild smooth';
+
+  const brands = state.currentResults.map(c => c.brand).join(', ');
+  const query = `Dig deeper: more cigars in the style of ${brands} — ${strengthHint}` +
+    `${topNotes.length ? ', ' + topNotes.join(', ') : ''}. Show me options I haven't seen yet.`;
+
+  setStatus('Arthur noticed you loved all 3 — going deeper…', { persistent: false });
+
+  setTimeout(() => {
+    queryInput.value = query;
+    form.dispatchEvent(new Event('submit', { cancelable: true }));
+  }, 900);
 }
 
 async function handleNotForMe(index) {
