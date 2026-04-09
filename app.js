@@ -3,6 +3,24 @@
 const API_PATH = '/.netlify/functions/recommend';
 const STATUS_AUTO_CLEAR_MS = 4000;
 
+// ---------------------------------------------------------------------------
+// Vague query detection
+// ---------------------------------------------------------------------------
+
+const STOP_WORDS = new Set([
+  'a','an','the','i','me','my','want','need','like','get','some','one',
+  'good','nice','great','best','any','please','just','maybe','kind','of',
+  'something','anything','stuff','thing','things','give','show','find','make',
+]);
+
+function isVagueQuery(q) {
+  if (!q || q.trim().length < 3) return true;
+  const words = q.trim().toLowerCase().split(/\s+/);
+  // Only 1 meaningful word total (excluding stop words)
+  const meaningful = words.filter(w => !STOP_WORDS.has(w) && w.length > 1);
+  return meaningful.length < 1;
+}
+
 const form        = document.getElementById('searchForm');
 const queryInput  = document.getElementById('query');
 const statusEl    = document.getElementById('status');
@@ -218,15 +236,55 @@ function syncButtons() {
 // Loading
 // ---------------------------------------------------------------------------
 
+function showLoadingState() {
+  resultsEl.innerHTML = `
+    <div class="arthur-loading" aria-live="polite" aria-label="Arthur is finding your cigars">
+      <div class="smoke-wrap" aria-hidden="true">
+        <span class="puff puff-1"></span>
+        <span class="puff puff-2"></span>
+        <span class="puff puff-3"></span>
+      </div>
+      <p class="loading-label">Arthur is selecting your cigars…</p>
+    </div>`;
+}
+
 function setLoading(v) {
   state.loading = v;
   const submit = form.querySelector('button[type="submit"]');
   if (submit) {
     submit.disabled = v;
-    submit.textContent = v ? 'Arthur is selecting your cigars…' : 'Find My Cigar';
+    submit.textContent = v ? 'Finding…' : 'Find My Cigar';
   }
   queryInput.disabled = v;
+  if (v) showLoadingState();
   syncButtons();
+}
+
+// ---------------------------------------------------------------------------
+// Error display
+// ---------------------------------------------------------------------------
+
+function showErrorState(message, { showRetry = false } = {}) {
+  const retryBtn = showRetry
+    ? `<button type="button" class="btn btn-primary error-retry" style="margin-top:16px">Try Again</button>`
+    : '';
+  resultsEl.innerHTML = `
+    <div class="arthur-error">
+      <div class="error-icon" aria-hidden="true">🌫️</div>
+      <p class="error-title">Arthur is having a moment</p>
+      <p class="error-msg">${message}</p>
+      ${retryBtn}
+    </div>`;
+  if (showRetry) {
+    resultsEl.querySelector('.error-retry').addEventListener('click', () => {
+      if (state.currentQuery) {
+        queryInput.value = state.currentQuery;
+        form.dispatchEvent(new Event('submit', { cancelable: true }));
+      } else {
+        showEmptyState();
+      }
+    });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -268,7 +326,7 @@ async function fetchRecommendations(statusMsg) {
     });
 
     if (res.status === 429) {
-      setStatus('Too many requests — please wait a moment.', { persistent: true });
+      showErrorState('Arthur is fielding a lot of requests right now. Give him a moment and try again.', { showRetry: true });
       return null;
     }
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -279,8 +337,13 @@ async function fetchRecommendations(statusMsg) {
 
   } catch (err) {
     if (err.name === 'AbortError') return null;
+    // Distinguish network failure from other errors
+    const isNetwork = err instanceof TypeError && err.message.toLowerCase().includes('fetch');
+    const msg = isNetwork
+      ? 'Looks like a network hiccup. Check your connection and give it another shot.'
+      : 'Arthur ran into an unexpected snag. Try rephrasing your request — he\'ll get it next time.';
     console.error('Fetch error:', err);
-    setStatus('Something went wrong — please try again.', { persistent: true });
+    showErrorState(msg, { showRetry: true });
     return null;
   } finally {
     state.abortController = null;
@@ -319,13 +382,19 @@ async function handleSearch(e) {
     return;
   }
 
+  // Vague query nudge — prompt before hitting the API
+  if (isVagueQuery(query)) {
+    setStatus('Can you give Arthur a bit more to work with? Try a flavor, brand, pairing, or occasion.', { persistent: true });
+    queryInput.focus();
+    return;
+  }
+
   resetForQuery(query);
-  resultsEl.innerHTML = '';
   clearBtn.style.display = 'inline-flex';
 
   const all = await fetchRecommendations();
   if (!all || !all.length) {
-    setStatus('No recommendations found — try a different search.', { persistent: true });
+    showErrorState('Arthur couldn\'t find a match for that one. Try a different flavor, brand, or occasion.', { showRetry: false });
     return;
   }
 
