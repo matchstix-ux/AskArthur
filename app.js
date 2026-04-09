@@ -568,7 +568,7 @@ resultsEl.addEventListener('click', async e => {
   if (!Number.isInteger(index)) return;
 
   if (likeBtn)     handleLike(index);
-  if (notForMeBtn) await handleNotForMe(index);
+  if (notForMeBtn) { notForMeBtn.disabled = true; await handleNotForMe(index); }
   if (dislikeBtn)  await handleReplace(index);
 });
 
