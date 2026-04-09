@@ -31,8 +31,9 @@ const clearBtn    = document.getElementById('clearBtn');
 // State
 // ---------------------------------------------------------------------------
 
-const STORAGE_KEY        = 'matchsticks-liked';
-const DISLIKED_STORAGE_KEY = 'matchsticks-disliked-persistent';
+const STORAGE_KEY          = 'matchsticks-liked';
+const DISLIKED_STORAGE_KEY  = 'matchsticks-disliked-persistent';
+const LIKED_DATA_KEY        = 'matchsticks-liked-data';
 
 function loadLikedFromStorage() {
   try {
@@ -60,18 +61,42 @@ function saveDislikedToStorage(dislikedSet) {
   } catch {}
 }
 
+function loadLikedData() {
+  try { return JSON.parse(localStorage.getItem(LIKED_DATA_KEY) || '[]'); } catch { return []; }
+}
+function saveLikedDataEntry(cigar) {
+  try {
+    const list = loadLikedData();
+    const key  = getCigarKey(cigar);
+    if (!list.find(c => c.key === key)) {
+      list.push({ key, name: cigar.name, brand: cigar.brand,
+                  strength: cigar.strength, flavorNotes: cigar.flavorNotes || [],
+                  priceRange: cigar.priceRange || '' });
+      localStorage.setItem(LIKED_DATA_KEY, JSON.stringify(list));
+    }
+  } catch {}
+}
+function removeLikedDataEntry(key) {
+  try {
+    const list = loadLikedData().filter(c => c.key !== key);
+    localStorage.setItem(LIKED_DATA_KEY, JSON.stringify(list));
+  } catch {}
+}
+
 const state = {
   currentQuery: '',
-  currentResults: [],   // the 3 cards on screen
-  buffer: [],           // extras returned by API, used for Replace
-  liked: loadLikedFromStorage(),              // persisted across sessions
-  dislikedPersistent: loadDislikedFromStorage(), // persisted dislikes (Not for me)
-  disliked: new Set(),                         // session-level (for Replace API filtering)
+  currentResults: [],
+  buffer: [],
+  liked: loadLikedFromStorage(),
+  dislikedPersistent: loadDislikedFromStorage(),
+  disliked: new Set(),
   seen: new Set(),
   loading: false,
   abortController: null,
   statusTimer: null,
-  // pairingMode removed — GPT auto-detects intent from query
+  recapOpen: false,
+  driftNudgeDismissed: false,
+  sessionLikedKeys: new Set(),
 };
 
 // ---------------------------------------------------------------------------
@@ -119,6 +144,90 @@ function strengthLabel(s) {
 }
 
 // ---------------------------------------------------------------------------
+// Liked data helpers — query enrichment, drift, recap
+// ---------------------------------------------------------------------------
+
+function buildEnrichedQuery(rawQuery) {
+  const data = loadLikedData();
+  if (!data.length) return rawQuery;
+  const freq = {};
+  data.forEach(c => (c.flavorNotes || []).forEach(f => {
+    const k = f.toLowerCase().trim();
+    freq[k] = (freq[k] || 0) + 1;
+  }));
+  const topFlavors = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0,3).map(([f]) => f);
+  const avg = data.reduce((s,c) => s + (Number(c.strength)||6), 0) / data.length;
+  const hint = avg >= 8 ? 'full body' : avg >= 6 ? 'medium body' : 'mild';
+  return `${rawQuery} (I tend to enjoy: ${[...topFlavors, hint].join(', ')})`;
+}
+
+function checkDriftNudge() {
+  if (state.driftNudgeDismissed) return;
+  const recent = [...state.sessionLikedKeys].slice(-3);
+  if (recent.length < 3) return;
+  const data = loadLikedData();
+  const cigars = recent.map(k => data.find(c => c.key === k)).filter(Boolean);
+  if (cigars.length < 3) return;
+  const strengths = cigars.map(c => Number(c.strength) || 6);
+  const delta = strengths[2] - strengths[0];
+  if (Math.abs(delta) >= 2) showDriftNudge(delta > 0 ? 'fuller' : 'lighter');
+}
+
+function showDriftNudge(direction) {
+  if (document.getElementById('drift-nudge')) return;
+  const nudge = document.createElement('div');
+  nudge.id = 'drift-nudge';
+  nudge.className = 'drift-nudge';
+  nudge.innerHTML = `
+    <span>Looks like you're going ${direction} — want Arthur to lean that way?</span>
+    <button type="button" class="drift-yes">Yes, lean ${direction}</button>
+    <button type="button" class="drift-dismiss" aria-label="Dismiss">&times;</button>`;
+  nudge.querySelector('.drift-yes').addEventListener('click', () => {
+    nudge.remove(); state.driftNudgeDismissed = true;
+    queryInput.value = direction === 'fuller'
+      ? 'full body rich bold strong cigars' : 'mild light smooth easy smoking cigars';
+    form.dispatchEvent(new Event('submit', { cancelable: true }));
+  });
+  nudge.querySelector('.drift-dismiss').addEventListener('click', () => {
+    nudge.remove(); state.driftNudgeDismissed = true;
+  });
+  document.getElementById('results').insertAdjacentElement('beforebegin', nudge);
+}
+
+function buildRecapDrawer() {
+  const data = loadLikedData();
+  document.getElementById('recap-drawer')?.remove();
+  if (!data.length) return;
+  const drawer = document.createElement('div');
+  drawer.id = 'recap-drawer';
+  drawer.className = 'recap-drawer' + (state.recapOpen ? ' open' : '');
+  drawer.innerHTML = `
+    <button type="button" class="recap-toggle">
+      ❤️ My Liked Cigars <span class="recap-count">${data.length}</span>
+      <span class="recap-chevron">${state.recapOpen ? '▼' : '▲'}</span>
+    </button>
+    <div class="recap-body">${data.map(c => `
+      <div class="recap-item">
+        <div>
+          <div class="recap-name">${escapeHtml(c.name)}</div>
+          <div class="recap-brand">${escapeHtml(c.brand)}${c.priceRange ? ' &middot; ' + escapeHtml(c.priceRange) : ''}</div>
+        </div>
+        <a class="recap-buy btn-buy"
+           href="https://www.famous-smoke.com/catalogsearch/result/?q=${encodeURIComponent(c.name)}"
+           target="_blank" rel="noopener noreferrer">🛒 Buy</a>
+      </div>`).join('')}
+    </div>`;
+  drawer.querySelector('.recap-toggle').addEventListener('click', () => {
+    state.recapOpen = !state.recapOpen;
+    drawer.classList.toggle('open', state.recapOpen);
+    drawer.querySelector('.recap-chevron').textContent = state.recapOpen ? '▼' : '▲';
+  });
+  document.body.appendChild(drawer);
+}
+
+function syncRecapDrawer() { buildRecapDrawer(); }
+
+// ---------------------------------------------------------------------------
 // Status
 // ---------------------------------------------------------------------------
 
@@ -154,6 +263,7 @@ const EMPTY_STATE_HTML = `
       <button type="button" class="hint-chip" data-query="ribeye steak dinner">Pairs with Steak</button>
       <button type="button" class="hint-chip" data-query="gift for cigar lover who smokes premium">Premium Gift</button>
       <button type="button" class="hint-chip" data-query="budget under 10 dollars cheap affordable">Under $10</button>
+      <button type="button" class="hint-chip surprise-chip" data-query="__surprise__">🔥 Surprise Me</button>
     </div>
   </div>`;
 
@@ -167,6 +277,7 @@ function showEmptyState() {
 
   resultsEl.querySelectorAll('.hint-chip').forEach(chip => {
     chip.addEventListener('click', () => {
+      if (chip.dataset.query === '__surprise__') { handleSurpriseMe(); return; }
       queryInput.value = chip.dataset.query;
       form.dispatchEvent(new Event('submit', { cancelable: true }));
     });
@@ -222,6 +333,9 @@ function renderCigar(cigar, index) {
         </button>
         <button type="button" class="dislike" title="Swap for a different recommendation">
           🔄 Replace
+        </button>
+        <button type="button" class="more-like-this" title="Find more cigars like this one">
+          🔍 More like this
         </button>
         <a class="btn-buy"
            href="https://www.famous-smoke.com/catalogsearch/result/?q=${encodeURIComponent(cigar.name)}"
@@ -475,10 +589,12 @@ async function handleReplace(index) {
     return;
   }
 
-  // Refill buffer with leftovers — exclude persistent dislikes
-  state.buffer = all.filter(c => getCigarKey(c) !== getCigarKey(replacement) &&
-                                  !existingKeys.has(getCigarKey(c)) &&
-                                  !state.dislikedPersistent.has(getCigarKey(c)));
+  // Refill buffer — exclude persistent dislikes and liked cigars
+  state.buffer = all.filter(c => {
+    const k = getCigarKey(c);
+    return k !== getCigarKey(replacement) && !existingKeys.has(k) &&
+           !state.dislikedPersistent.has(k) && !state.liked.has(k);
+  });
   state.currentResults[index] = replacement;
   rememberSeen([replacement, ...state.buffer]);
   updateCardAt(index);
@@ -492,17 +608,22 @@ function handleLike(index) {
   const key = getCigarKey(cigar);
   if (state.liked.has(key)) {
     state.liked.delete(key);
+    removeLikedDataEntry(key);
+    state.sessionLikedKeys.delete(key);
     setStatus('Removed from liked.');
   } else {
     state.liked.add(key);
     state.disliked.delete(key);
-    // Remove from persistent dislikes if user now likes it
     state.dislikedPersistent.delete(key);
     saveDislikedToStorage(state.dislikedPersistent);
+    saveLikedDataEntry(cigar);
+    state.sessionLikedKeys.add(key);
     setStatus('Saved to your preferences.');
+    checkDriftNudge();
   }
   saveLikedToStorage(state.liked);
   updateCardAt(index);
+  syncRecapDrawer();
   checkAllLiked();
 }
 
@@ -590,13 +711,44 @@ function handleClear() {
 // Event binding
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Surprise Me
+// ---------------------------------------------------------------------------
+
+async function handleSurpriseMe() {
+  const data = loadLikedData();
+  let query;
+  if (data.length >= 2) {
+    const freq = {};
+    data.forEach(c => (c.flavorNotes||[]).forEach(f => {
+      const k = f.toLowerCase().trim(); freq[k]=(freq[k]||0)+1;
+    }));
+    const top = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([f])=>f);
+    const avg = data.reduce((s,c)=>s+(Number(c.strength)||6),0)/data.length;
+    const hint = avg>=8?'full body bold':avg>=6?'medium body':'mild smooth';
+    query = `Surprise me with something ${hint}${top.length?', '+top.join(', '):''}. Something I haven't tried.`;
+  } else {
+    const moods = [
+      'something bold and adventurous',
+      'a smooth and relaxed smoke',
+      'a hidden gem under $12',
+      'a special occasion cigar',
+      'something spicy and full bodied',
+    ];
+    query = `Surprise me with ${moods[Math.floor(Math.random()*moods.length)]}`;
+  }
+  queryInput.value = query;
+  form.dispatchEvent(new Event('submit', { cancelable: true }));
+}
+
 form.addEventListener('submit', handleSearch);
 clearBtn.addEventListener('click', handleClear);
 resultsEl.addEventListener('click', async e => {
-  const likeBtn      = e.target.closest('.like');
-  const notForMeBtn  = e.target.closest('.not-for-me');
-  const dislikeBtn   = e.target.closest('.dislike');
-  if (!likeBtn && !notForMeBtn && !dislikeBtn) return;
+  const likeBtn     = e.target.closest('.like');
+  const notForMeBtn = e.target.closest('.not-for-me');
+  const dislikeBtn  = e.target.closest('.dislike');
+  const moreLikeBtn = e.target.closest('.more-like-this');
+  if (!likeBtn && !notForMeBtn && !dislikeBtn && !moreLikeBtn) return;
 
   const card = e.target.closest('.card');
   if (!card) return;
@@ -606,6 +758,14 @@ resultsEl.addEventListener('click', async e => {
   if (likeBtn)     handleLike(index);
   if (notForMeBtn) { notForMeBtn.disabled = true; notForMeBtn.blur(); await handleNotForMe(index); }
   if (dislikeBtn)  await handleReplace(index);
+  if (moreLikeBtn) {
+    const cigar = state.currentResults[index];
+    if (!cigar) return;
+    const notes = (cigar.flavorNotes||[]).slice(0,2).join(', ');
+    const strength = strengthLabel(cigar.strength).toLowerCase();
+    queryInput.value = `More cigars like ${cigar.name}: ${strength}${notes?', '+notes:''}`;
+    form.dispatchEvent(new Event('submit', { cancelable: true }));
+  }
 });
 
 // ---------------------------------------------------------------------------
