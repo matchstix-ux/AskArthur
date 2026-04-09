@@ -244,7 +244,6 @@ function showLoadingState() {
         <span class="puff puff-2"></span>
         <span class="puff puff-3"></span>
       </div>
-      <p class="loading-label">Arthur is selecting your cigars…</p>
     </div>`;
 }
 
@@ -253,7 +252,7 @@ function setLoading(v) {
   const submit = form.querySelector('button[type="submit"]');
   if (submit) {
     submit.disabled = v;
-    submit.textContent = v ? 'Finding…' : 'Find My Cigar';
+    submit.textContent = v ? 'Arthur is selecting your cigars…' : 'Find My Cigar';
   }
   queryInput.disabled = v;
   if (v) showLoadingState();
