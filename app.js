@@ -144,7 +144,6 @@ const EMPTY_STATE_HTML = `
     <div class="hint-chips">
       <button type="button" class="hint-chip" data-query="spicy and full body">Spicy &amp; Full-Bodied</button>
       <button type="button" class="hint-chip" data-query="creamy and smooth mild">Creamy &amp; Smooth</button>
-      <button type="button" class="hint-chip" data-query="mild and aromatic Connecticut wrapper smooth">Mild &amp; Aromatic</button>
       <button type="button" class="hint-chip" data-query="like a Padron but more affordable">Like Padron, more affordable</button>
       <button type="button" class="hint-chip" data-query="new to cigars something approachable">New to cigars</button>
       <button type="button" class="hint-chip" data-query="morning smoke lighter mild easy draw breakfast">Morning Smoke</button>
