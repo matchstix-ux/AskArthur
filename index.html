@@ -550,15 +550,6 @@
       color: var(--accent);
     }
 
-    .reset-session-btn {
-      font-size: 0.75rem;
-      color: var(--muted);
-      border-color: transparent;
-      padding: 6px 10px;
-      opacity: 0.6;
-    }
-    .reset-session-btn:hover { opacity: 1; color: var(--text); }
-
     /* ── Surprise me chip ── */
     .hint-chip.surprise-chip {
       border-color: var(--border);
@@ -679,6 +670,21 @@
       padding: 4px 10px;
       font-size: 0.78rem;
     }
+    .recap-footer {
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+    }
+    .recap-forget {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 0.78rem;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+    .recap-forget:hover { color: #e05a5a; }
 
     /* ── Footer ── */
     footer {
@@ -718,8 +724,7 @@
                  placeholder="Tell us what you like (brand, profile, drink)" />
           <button type="submit" class="btn btn-primary">Get My Recs</button>
           <button type="button" id="clearBtn" class="btn btn-ghost"
-                  style="display:none">Clear</button>
-          <button type="button" id="resetSessionBtn" class="btn btn-ghost reset-session-btn">Reset likes</button>
+                  style="display:none">New Search</button>
         </div>
       </form>
       <div id="status" class="status"></div>

@@ -206,21 +206,28 @@ function buildRecapDrawer() {
       ❤️ My Liked Cigars <span class="recap-count">${data.length}</span>
       <span class="recap-chevron">${state.recapOpen ? '▼' : '▲'}</span>
     </button>
-    <div class="recap-body">${data.map(c => `
-      <div class="recap-item">
-        <div>
-          <div class="recap-name">${escapeHtml(c.name)}</div>
-          <div class="recap-brand">${escapeHtml(c.brand)}${c.priceRange ? ' &middot; ' + escapeHtml(c.priceRange) : ''}</div>
-        </div>
-        <a class="recap-buy btn-buy"
-           href="https://www.famous-smoke.com/catalogsearch/result/?q=${encodeURIComponent(c.name)}"
-           target="_blank" rel="noopener noreferrer">🛒 Buy</a>
-      </div>`).join('')}
+    <div class="recap-body">
+      ${data.map(c => `
+        <div class="recap-item">
+          <div>
+            <div class="recap-name">${escapeHtml(c.name)}</div>
+            <div class="recap-brand">${escapeHtml(c.brand)}${c.priceRange ? ' &middot; ' + escapeHtml(c.priceRange) : ''}</div>
+          </div>
+          <a class="recap-buy btn-buy"
+             href="https://www.famous-smoke.com/catalogsearch/result/?q=${encodeURIComponent(c.name)}"
+             target="_blank" rel="noopener noreferrer">🛒 Buy</a>
+        </div>`).join('')}
+      <div class="recap-footer">
+        <button type="button" class="recap-forget">Forget my picks</button>
+      </div>
     </div>`;
   drawer.querySelector('.recap-toggle').addEventListener('click', () => {
     state.recapOpen = !state.recapOpen;
     drawer.classList.toggle('open', state.recapOpen);
     drawer.querySelector('.recap-chevron').textContent = state.recapOpen ? '▼' : '▲';
+  });
+  drawer.querySelector('.recap-forget').addEventListener('click', () => {
+    handleResetSession();
   });
   document.body.appendChild(drawer);
 }
@@ -760,7 +767,7 @@ function handleResetSession() {
 
 form.addEventListener('submit', handleSearch);
 clearBtn.addEventListener('click', handleClear);
-document.getElementById('resetSessionBtn').addEventListener('click', handleResetSession);
+
 resultsEl.addEventListener('click', async e => {
   const likeBtn     = e.target.closest('.like');
   const notForMeBtn = e.target.closest('.not-for-me');
