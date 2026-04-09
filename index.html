@@ -452,20 +452,21 @@
     .puff {
       position: absolute;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(200,168,75,0.55) 0%, rgba(200,168,75,0) 70%);
-      animation: puff-rise 2.2s ease-in-out infinite;
+      background: transparent;
+      border: 4px solid rgba(200,168,75,0.7);
+      animation: ring-rise 2.4s ease-out infinite;
       bottom: 0;
       left: 50%;
       transform: translateX(-50%) scale(0);
     }
-    .puff-1 { width: 70px;  height: 70px;  animation-delay: 0s; }
-    .puff-2 { width: 105px; height: 105px; animation-delay: 0.55s; }
-    .puff-3 { width: 52px;  height: 52px;  animation-delay: 1.1s; }
-    @keyframes puff-rise {
-      0%   { transform: translateX(-50%) scale(0);   opacity: 0; bottom: 0; }
-      20%  { opacity: 0.9; }
-      80%  { opacity: 0.3; }
-      100% { transform: translateX(-50%) scale(1.6); opacity: 0; bottom: 115px; }
+    .puff-1 { width: 60px;  height: 36px;  animation-delay: 0s;    border-width: 4px; }
+    .puff-2 { width: 88px;  height: 52px;  animation-delay: 0.8s;  border-width: 3px; }
+    .puff-3 { width: 44px;  height: 26px;  animation-delay: 1.6s;  border-width: 3px; }
+    @keyframes ring-rise {
+      0%   { transform: translateX(-50%) scale(0.2) rotateX(70deg); opacity: 0;   bottom: 0; }
+      15%  { opacity: 0.9; }
+      60%  { opacity: 0.5; }
+      100% { transform: translateX(-50%) scale(2.2) rotateX(70deg); opacity: 0;   bottom: 110px; }
     }
 
     /* ── Arthur error state ── */
