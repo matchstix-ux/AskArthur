@@ -738,8 +738,29 @@ async function handleSurpriseMe() {
   form.dispatchEvent(new Event('submit', { cancelable: true }));
 }
 
+function handleResetSession() {
+  // Clear all liked data from storage and state
+  state.liked.clear();
+  saveLikedToStorage(state.liked);
+  state.dislikedPersistent.clear();
+  saveDislikedToStorage(state.dislikedPersistent);
+  try { localStorage.removeItem(LIKED_DATA_KEY); } catch {}
+  state.sessionLikedKeys.clear();
+  state.driftNudgeDismissed = false;
+
+  // Remove drift nudge and recap drawer if visible
+  document.getElementById('drift-nudge')?.remove();
+  document.getElementById('recap-drawer')?.remove();
+
+  // Re-render any visible cards to clear liked/not-for-me states
+  if (state.currentResults.length) renderResults();
+
+  setStatus('All likes cleared — clean slate.');
+}
+
 form.addEventListener('submit', handleSearch);
 clearBtn.addEventListener('click', handleClear);
+document.getElementById('resetSessionBtn').addEventListener('click', handleResetSession);
 resultsEl.addEventListener('click', async e => {
   const likeBtn     = e.target.closest('.like');
   const notForMeBtn = e.target.closest('.not-for-me');

@@ -550,6 +550,15 @@
       color: var(--accent);
     }
 
+    .reset-session-btn {
+      font-size: 0.75rem;
+      color: var(--muted);
+      border-color: transparent;
+      padding: 6px 10px;
+      opacity: 0.6;
+    }
+    .reset-session-btn:hover { opacity: 1; color: var(--text); }
+
     /* ── Surprise me chip ── */
     .hint-chip.surprise-chip {
       border-color: var(--border);
@@ -710,6 +719,7 @@
           <button type="submit" class="btn btn-primary">Get My Recs</button>
           <button type="button" id="clearBtn" class="btn btn-ghost"
                   style="display:none">Clear</button>
+          <button type="button" id="resetSessionBtn" class="btn btn-ghost reset-session-btn">Reset likes</button>
         </div>
       </form>
       <div id="status" class="status"></div>
