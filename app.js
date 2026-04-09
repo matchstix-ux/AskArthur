@@ -234,129 +234,7 @@ function renderCigar(cigar, index) {
     </article>`;
 }
 
-// ---------------------------------------------------------------------------
-// Preference summary panel
-// ---------------------------------------------------------------------------
 
-const LIKED_CIGARS_KEY = 'matchsticks-liked-cigars-data';
-
-function saveLikedCigarData(cigar) {
-  try {
-    const raw = localStorage.getItem(LIKED_CIGARS_KEY);
-    const existing = raw ? JSON.parse(raw) : [];
-    const key = getCigarKey(cigar);
-    if (!existing.find(c => getCigarKey(c) === key)) {
-      existing.push({
-        key,
-        flavorNotes: cigar.flavorNotes || [],
-        strength: cigar.strength,
-        priceRange: cigar.priceRange || ''
-      });
-      localStorage.setItem(LIKED_CIGARS_KEY, JSON.stringify(existing));
-    }
-  } catch {}
-}
-
-function removeLikedCigarData(key) {
-  try {
-    const raw = localStorage.getItem(LIKED_CIGARS_KEY);
-    if (!raw) return;
-    const existing = JSON.parse(raw).filter(c => c.key !== key);
-    localStorage.setItem(LIKED_CIGARS_KEY, JSON.stringify(existing));
-  } catch {}
-}
-
-function loadLikedCigarData() {
-  try {
-    const raw = localStorage.getItem(LIKED_CIGARS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
-}
-
-function buildTasteProfile() {
-  const cigars = loadLikedCigarData();
-  if (cigars.length < 2) return null;
-
-  // Flavor frequency
-  const flavorCount = {};
-  cigars.forEach(c => {
-    (c.flavorNotes || []).forEach(f => {
-      const k = f.trim().toLowerCase();
-      flavorCount[k] = (flavorCount[k] || 0) + 1;
-    });
-  });
-  const topFlavors = Object.entries(flavorCount)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(([f]) => f.charAt(0).toUpperCase() + f.slice(1));
-
-  // Average strength label
-  const avgStrength = cigars.reduce((s, c) => s + (Number(c.strength) || 6), 0) / cigars.length;
-  const strengthTag = strengthLabel(Math.round(avgStrength));
-
-  // Most common price tier (just pick most frequent)
-  const priceCount = {};
-  cigars.forEach(c => {
-    if (c.priceRange) priceCount[c.priceRange] = (priceCount[c.priceRange] || 0) + 1;
-  });
-  const topPrice = Object.entries(priceCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '';
-
-  return { topFlavors, strengthTag, topPrice, count: cigars.length };
-}
-
-function renderTasteProfile() {
-  const panelId = 'taste-profile-panel';
-  let panel = document.getElementById(panelId);
-  const profile = buildTasteProfile();
-
-  if (!profile) {
-    if (panel) panel.remove();
-    return;
-  }
-
-  const flavorStr  = profile.topFlavors.length ? profile.topFlavors.join(', ') : '';
-  const priceStr   = profile.topPrice ? ` · ${profile.topPrice}` : '';
-  const html = `
-    <div id="${panelId}" class="taste-profile" aria-label="Your taste profile">
-      <span class="taste-label">Your taste profile</span>
-      <span class="taste-tags">
-        ${profile.strengthTag ? `<span class="taste-tag">${escapeHtml(profile.strengthTag)}</span>` : ''}
-        ${flavorStr ? flavorStr.split(', ').map(f => `<span class="taste-tag">${escapeHtml(f)}</span>`).join('') : ''}
-        ${priceStr ? `<span class="taste-tag taste-tag-price">${escapeHtml(profile.topPrice)}</span>` : ''}
-      </span>
-      <span class="taste-count">${profile.count} liked</span>
-      <button type="button" class="taste-reset" title="Clear taste profile and start fresh">Reset</button>
-    </div>`;
-
-  if (panel) {
-    panel.outerHTML = html;
-  } else {
-    const anchor = document.getElementById('results');
-    anchor.insertAdjacentHTML('beforebegin', html);
-  }
-
-  // Bind reset button after insertion
-  document.getElementById(panelId)
-    ?.querySelector('.taste-reset')
-    ?.addEventListener('click', clearTasteProfile);
-}
-
-function clearTasteProfile() {
-  // Wipe liked cigars and persistent dislikes from storage and state
-  try { localStorage.removeItem(LIKED_CIGARS_KEY); } catch {}
-  state.liked.clear();
-  saveLikedToStorage(state.liked);
-  state.dislikedPersistent.clear();
-  saveDislikedToStorage(state.dislikedPersistent);
-
-  // Remove panel from DOM
-  document.getElementById('taste-profile-panel')?.remove();
-
-  // Re-render cards so Like/Not-for-me states update visually
-  if (state.currentResults.length) renderResults();
-
-  setStatus('Taste profile cleared — starting fresh.');
-}
 
 function renderResults() {
   if (!state.currentResults.length) { showEmptyState(); return; }
@@ -609,7 +487,6 @@ function handleLike(index) {
   const key = getCigarKey(cigar);
   if (state.liked.has(key)) {
     state.liked.delete(key);
-    removeLikedCigarData(key);
     setStatus('Removed from liked.');
   } else {
     state.liked.add(key);
@@ -617,12 +494,10 @@ function handleLike(index) {
     // Remove from persistent dislikes if user now likes it
     state.dislikedPersistent.delete(key);
     saveDislikedToStorage(state.dislikedPersistent);
-    saveLikedCigarData(cigar);
     setStatus('Saved to your preferences.');
   }
   saveLikedToStorage(state.liked);
   updateCardAt(index);
-  renderTasteProfile();
 }
 
 async function handleNotForMe(index) {
@@ -646,9 +521,7 @@ async function handleNotForMe(index) {
   // Also remove from liked if it was liked
   if (state.liked.has(key)) {
     state.liked.delete(key);
-    removeLikedCigarData(key);
     saveLikedToStorage(state.liked);
-    renderTasteProfile();
   }
   // Add to session disliked so Replace won't bring it back
   state.disliked.add(key);
