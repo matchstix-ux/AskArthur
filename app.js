@@ -334,9 +334,6 @@ function renderCigar(cigar, index) {
         <button type="button" class="dislike" title="Swap for a different recommendation">
           🔄 Replace
         </button>
-        <button type="button" class="more-like-this" title="Find more cigars like this one">
-          🔍 More like this
-        </button>
         <a class="btn-buy"
            href="https://www.famous-smoke.com/catalogsearch/result/?q=${encodeURIComponent(cigar.name)}"
            target="_blank"
