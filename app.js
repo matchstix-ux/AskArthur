@@ -31,7 +31,8 @@ const clearBtn    = document.getElementById('clearBtn');
 // State
 // ---------------------------------------------------------------------------
 
-const STORAGE_KEY = 'matchsticks-liked';
+const STORAGE_KEY        = 'matchsticks-liked';
+const DISLIKED_STORAGE_KEY = 'matchsticks-disliked-persistent';
 
 function loadLikedFromStorage() {
   try {
@@ -46,12 +47,26 @@ function saveLikedToStorage(likedSet) {
   } catch {}
 }
 
+function loadDislikedFromStorage() {
+  try {
+    const raw = localStorage.getItem(DISLIKED_STORAGE_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch { return new Set(); }
+}
+
+function saveDislikedToStorage(dislikedSet) {
+  try {
+    localStorage.setItem(DISLIKED_STORAGE_KEY, JSON.stringify([...dislikedSet]));
+  } catch {}
+}
+
 const state = {
   currentQuery: '',
   currentResults: [],   // the 3 cards on screen
   buffer: [],           // extras returned by API, used for Replace
-  liked: loadLikedFromStorage(),  // persisted across sessions
-  disliked: new Set(),
+  liked: loadLikedFromStorage(),              // persisted across sessions
+  dislikedPersistent: loadDislikedFromStorage(), // persisted dislikes (Not for me)
+  disliked: new Set(),                         // session-level (for Replace API filtering)
   seen: new Set(),
   loading: false,
   abortController: null,
@@ -129,8 +144,12 @@ const EMPTY_STATE_HTML = `
     <div class="hint-chips">
       <button type="button" class="hint-chip" data-query="spicy and full body">Spicy &amp; Full-Bodied</button>
       <button type="button" class="hint-chip" data-query="creamy and smooth mild">Creamy &amp; Smooth</button>
+      <button type="button" class="hint-chip" data-query="mild and aromatic Connecticut wrapper smooth">Mild &amp; Aromatic</button>
       <button type="button" class="hint-chip" data-query="like a Padron but more affordable">Like Padron, more affordable</button>
       <button type="button" class="hint-chip" data-query="new to cigars something approachable">New to cigars</button>
+      <button type="button" class="hint-chip" data-query="morning smoke lighter mild easy draw breakfast">Morning Smoke</button>
+      <button type="button" class="hint-chip" data-query="outdoor casual relaxed backyard everyday smoke">Outdoor &amp; Casual</button>
+      <button type="button" class="hint-chip" data-query="celebratory special occasion premium achievement">Celebratory</button>
       <button type="button" class="hint-chip" data-query="bourbon">Pairs with Bourbon</button>
       <button type="button" class="hint-chip" data-query="espresso coffee">Pairs with Espresso</button>
       <button type="button" class="hint-chip" data-query="ribeye steak dinner">Pairs with Steak</button>
@@ -159,6 +178,7 @@ function showEmptyState() {
 function renderCigar(cigar, index) {
   const key       = getCigarKey(cigar);
   const liked     = state.liked.has(key);
+  const notForMe  = state.dislikedPersistent.has(key);
   const pct       = strengthPercent(cigar.strength);
   const label     = strengthLabel(cigar.strength);
   const notes     = Array.isArray(cigar.flavorNotes)
@@ -197,8 +217,13 @@ function renderCigar(cigar, index) {
                 title="${liked ? 'Remove like' : 'Like this cigar'}">
           ${liked ? '❤️ Liked' : '👍 Like'}
         </button>
-        <button type="button" class="dislike" title="Replace this recommendation">
-          👎 Replace
+        <button type="button" class="not-for-me ${notForMe ? 'active' : ''}"
+                aria-pressed="${notForMe}"
+                title="Not for me — Arthur won't recommend this again">
+          ${notForMe ? '🚫 Not for me' : '🚫 Not for me'}
+        </button>
+        <button type="button" class="dislike" title="Swap for a different recommendation">
+          🔄 Replace
         </button>
         <a class="btn-buy"
            href="https://www.famous-smoke.com/catalogsearch/result/?q=${encodeURIComponent(cigar.name)}"
@@ -209,6 +234,108 @@ function renderCigar(cigar, index) {
         </a>
       </div>
     </article>`;
+}
+
+// ---------------------------------------------------------------------------
+// Preference summary panel
+// ---------------------------------------------------------------------------
+
+const LIKED_CIGARS_KEY = 'matchsticks-liked-cigars-data';
+
+function saveLikedCigarData(cigar) {
+  try {
+    const raw = localStorage.getItem(LIKED_CIGARS_KEY);
+    const existing = raw ? JSON.parse(raw) : [];
+    const key = getCigarKey(cigar);
+    if (!existing.find(c => getCigarKey(c) === key)) {
+      existing.push({
+        key,
+        flavorNotes: cigar.flavorNotes || [],
+        strength: cigar.strength,
+        priceRange: cigar.priceRange || ''
+      });
+      localStorage.setItem(LIKED_CIGARS_KEY, JSON.stringify(existing));
+    }
+  } catch {}
+}
+
+function removeLikedCigarData(key) {
+  try {
+    const raw = localStorage.getItem(LIKED_CIGARS_KEY);
+    if (!raw) return;
+    const existing = JSON.parse(raw).filter(c => c.key !== key);
+    localStorage.setItem(LIKED_CIGARS_KEY, JSON.stringify(existing));
+  } catch {}
+}
+
+function loadLikedCigarData() {
+  try {
+    const raw = localStorage.getItem(LIKED_CIGARS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function buildTasteProfile() {
+  const cigars = loadLikedCigarData();
+  if (cigars.length < 2) return null;
+
+  // Flavor frequency
+  const flavorCount = {};
+  cigars.forEach(c => {
+    (c.flavorNotes || []).forEach(f => {
+      const k = f.trim().toLowerCase();
+      flavorCount[k] = (flavorCount[k] || 0) + 1;
+    });
+  });
+  const topFlavors = Object.entries(flavorCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([f]) => f.charAt(0).toUpperCase() + f.slice(1));
+
+  // Average strength label
+  const avgStrength = cigars.reduce((s, c) => s + (Number(c.strength) || 6), 0) / cigars.length;
+  const strengthTag = strengthLabel(Math.round(avgStrength));
+
+  // Most common price tier (just pick most frequent)
+  const priceCount = {};
+  cigars.forEach(c => {
+    if (c.priceRange) priceCount[c.priceRange] = (priceCount[c.priceRange] || 0) + 1;
+  });
+  const topPrice = Object.entries(priceCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '';
+
+  return { topFlavors, strengthTag, topPrice, count: cigars.length };
+}
+
+function renderTasteProfile() {
+  const panelId = 'taste-profile-panel';
+  let panel = document.getElementById(panelId);
+  const profile = buildTasteProfile();
+
+  if (!profile) {
+    if (panel) panel.remove();
+    return;
+  }
+
+  const flavorStr  = profile.topFlavors.length ? profile.topFlavors.join(', ') : '';
+  const priceStr   = profile.topPrice ? ` · ${profile.topPrice}` : '';
+  const html = `
+    <div id="${panelId}" class="taste-profile" aria-label="Your taste profile">
+      <span class="taste-label">Your taste profile</span>
+      <span class="taste-tags">
+        ${profile.strengthTag ? `<span class="taste-tag">${escapeHtml(profile.strengthTag)}</span>` : ''}
+        ${flavorStr ? flavorStr.split(', ').map(f => `<span class="taste-tag">${escapeHtml(f)}</span>`).join('') : ''}
+        ${priceStr ? `<span class="taste-tag taste-tag-price">${escapeHtml(profile.topPrice)}</span>` : ''}
+      </span>
+      <span class="taste-count">${profile.count} liked</span>
+    </div>`;
+
+  if (panel) {
+    panel.outerHTML = html;
+  } else {
+    // Insert just above the results section
+    const anchor = document.getElementById('results');
+    anchor.insertAdjacentHTML('beforebegin', html);
+  }
 }
 
 function renderResults() {
@@ -313,7 +440,7 @@ async function fetchRecommendations(statusMsg) {
     const payload = {
       query,
       liked:    [...state.liked],
-      disliked: [...state.disliked],
+      disliked: [...state.disliked, ...state.dislikedPersistent],
       seen:     [...state.seen],
     };
 
@@ -462,14 +589,52 @@ function handleLike(index) {
   const key = getCigarKey(cigar);
   if (state.liked.has(key)) {
     state.liked.delete(key);
+    removeLikedCigarData(key);
     setStatus('Removed from liked.');
   } else {
     state.liked.add(key);
     state.disliked.delete(key);
+    // Remove from persistent dislikes if user now likes it
+    state.dislikedPersistent.delete(key);
+    saveDislikedToStorage(state.dislikedPersistent);
+    saveLikedCigarData(cigar);
     setStatus('Saved to your preferences.');
   }
   saveLikedToStorage(state.liked);
   updateCardAt(index);
+  renderTasteProfile();
+}
+
+async function handleNotForMe(index) {
+  if (state.loading) return;
+  const cigar = state.currentResults[index];
+  if (!cigar) return;
+  const key = getCigarKey(cigar);
+
+  if (state.dislikedPersistent.has(key)) {
+    // Toggle off
+    state.dislikedPersistent.delete(key);
+    saveDislikedToStorage(state.dislikedPersistent);
+    updateCardAt(index);
+    setStatus('Removed from dislikes.');
+    return;
+  }
+
+  // Mark as not-for-me persistently
+  state.dislikedPersistent.add(key);
+  saveDislikedToStorage(state.dislikedPersistent);
+  // Also remove from liked if it was liked
+  if (state.liked.has(key)) {
+    state.liked.delete(key);
+    removeLikedCigarData(key);
+    saveLikedToStorage(state.liked);
+    renderTasteProfile();
+  }
+  // Add to session disliked so Replace won't bring it back
+  state.disliked.add(key);
+  setStatus('Got it — Arthur won\'t recommend this again.');
+  // Auto-replace the card
+  await handleReplace(index);
 }
 
 function handleClear() {
@@ -494,17 +659,19 @@ function handleClear() {
 form.addEventListener('submit', handleSearch);
 clearBtn.addEventListener('click', handleClear);
 resultsEl.addEventListener('click', async e => {
-  const likeBtn    = e.target.closest('.like');
-  const dislikeBtn = e.target.closest('.dislike');
-  if (!likeBtn && !dislikeBtn) return;
+  const likeBtn      = e.target.closest('.like');
+  const notForMeBtn  = e.target.closest('.not-for-me');
+  const dislikeBtn   = e.target.closest('.dislike');
+  if (!likeBtn && !notForMeBtn && !dislikeBtn) return;
 
   const card = e.target.closest('.card');
   if (!card) return;
   const index = parseInt(card.dataset.index, 10);
   if (!Number.isInteger(index)) return;
 
-  if (likeBtn)    handleLike(index);
-  if (dislikeBtn) await handleReplace(index);
+  if (likeBtn)     handleLike(index);
+  if (notForMeBtn) await handleNotForMe(index);
+  if (dislikeBtn)  await handleReplace(index);
 });
 
 // ---------------------------------------------------------------------------
