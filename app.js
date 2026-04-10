@@ -282,10 +282,13 @@ const EMPTY_STATE_HTML = `
 function showEmptyState() {
   const likedCount = state.liked.size;
   const memoryNote = likedCount > 0
-    ? `<p style="color:var(--accent-2);margin-top:8px;font-size:0.85rem">♥ ${likedCount} liked cigar${likedCount > 1 ? 's' : ''} remembered from your last session</p>`
+    ? `<p style="color:var(--accent-2);margin-top:8px;font-size:0.85rem">♥ ${likedCount} liked cigar${likedCount > 1 ? 's' : ''} remembered — <button type="button" id="inlineClearBtn" style="background:none;border:none;cursor:pointer;color:#e05a5a;font-size:0.85rem;font-weight:600;padding:0;text-decoration:underline">Clear</button></p>`
     : '';
 
   resultsEl.innerHTML = EMPTY_STATE_HTML.replace('</div>\n  </div>', `${memoryNote}</div>\n  </div>`);
+
+  // Wire inline clear button
+  document.getElementById('inlineClearBtn')?.addEventListener('click', () => handleResetSession());
 
   resultsEl.querySelectorAll('.hint-chip').forEach(chip => {
     chip.addEventListener('click', () => {
@@ -951,7 +954,19 @@ function showShareBar() {
     : document.body.appendChild(bar);
 }
 
-// Sync share bar whenever liked state changes
+// ---------------------------------------------------------------------------
+// Topbar clear button — show/hide based on liked state
+// ---------------------------------------------------------------------------
+
+function syncTopbarClear() {
+  const btn = document.getElementById('topbarClearBtn');
+  if (!btn) return;
+  btn.style.display = state.liked.size > 0 ? 'inline' : 'none';
+}
+
+document.getElementById('topbarClearBtn')?.addEventListener('click', () => handleResetSession());
+
+// Sync share bar and topbar clear button whenever liked state changes
 const _origSyncRecapDrawer = syncRecapDrawer;
 syncRecapDrawer = function() {
   _origSyncRecapDrawer();
@@ -961,6 +976,7 @@ syncRecapDrawer = function() {
   } else {
     document.getElementById('share-bar')?.remove();
   }
+  syncTopbarClear();
 };
 
 // ---------------------------------------------------------------------------
@@ -1004,3 +1020,4 @@ form.addEventListener('submit', handleSearch);
 
 showEmptyState();
 syncRecapDrawer();
+syncTopbarClear();
