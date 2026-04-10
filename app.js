@@ -888,7 +888,7 @@ document.getElementById('occasionBar')?.addEventListener('click', e => {
     b.classList.toggle('active', b === btn));
   // Update placeholder to reflect occasion
   const placeholders = {
-    everyday: 'Flavor, brand, or what you\'re drinking — everyday smoke',
+    everyday: 'Flavor, brand, or what you\'re drinking — daily smoke',
     special:  'Flavor, brand, or pairing — special occasion',
     gift:     'Who\'s it for? Brand, profile, or budget',
     '':       'Tell us what you like (brand, profile, drink)',
