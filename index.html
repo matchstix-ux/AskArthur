@@ -712,6 +712,138 @@
       padding-top: 20px;
     }
     footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── Occasion mode ── */
+    .occasion-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .occasion-btn {
+      flex: 1;
+      min-width: 100px;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .occasion-btn:hover { color: var(--text); border-color: var(--muted); }
+    .occasion-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .occasion-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    /* ── Price filter ── */
+    .price-filter-bar {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .price-filter-btn {
+      padding: 4px 14px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .price-filter-btn:hover { color: var(--text); border-color: var(--muted); }
+    .price-filter-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    /* ── Strength label badge on bar ── */
+    .strength-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 1px 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── Start Over mood prompt ── */
+    .mood-prompt {
+      background: var(--surface);
+      border: 1px solid var(--accent-dim);
+      border-left: 3px solid var(--accent);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: var(--text);
+      animation: fade-in 0.3s ease;
+    }
+    .mood-prompt span { flex: 1; min-width: 160px; }
+    .mood-explore {
+      background: transparent;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: 5px 14px;
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .mood-explore:hover { background: var(--accent); color: #000; }
+    .mood-dismiss {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0 4px;
+      line-height: 1;
+    }
+
+    /* ── Share picks ── */
+    .share-bar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 6px;
+    }
+    .share-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 14px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .share-btn:hover { color: var(--accent); border-color: var(--accent); }
   </style>
 </head>
 <body>
@@ -733,6 +865,14 @@
     </div>
 
     <section class="panel">
+      <!-- Occasion mode -->
+      <div class="occasion-label">Occasion</div>
+      <div class="occasion-bar" id="occasionBar">
+        <button type="button" class="occasion-btn active" data-occasion="">🟤 Any</button>
+        <button type="button" class="occasion-btn" data-occasion="everyday">☕ Everyday</button>
+        <button type="button" class="occasion-btn" data-occasion="special">🥂 Special Occasion</button>
+        <button type="button" class="occasion-btn" data-occasion="gift">🎁 Gift</button>
+      </div>
       <form id="searchForm" novalidate>
         <label for="query">Get cigar or pairing recommendations</label>
         <div class="controls">
@@ -743,6 +883,13 @@
                   style="display:none">New Search</button>
         </div>
       </form>
+      <!-- Price filter -->
+      <div class="price-filter-bar" id="priceFilterBar" style="display:none">
+        <button type="button" class="price-filter-btn active" data-price="all">All Prices</button>
+        <button type="button" class="price-filter-btn" data-price="under10">Under $10</button>
+        <button type="button" class="price-filter-btn" data-price="10to20">$10–$20</button>
+        <button type="button" class="price-filter-btn" data-price="over20">$20+</button>
+      </div>
       <div id="status" class="status"></div>
     </section>
 

@@ -97,7 +97,12 @@ const state = {
   recapOpen: false,
   driftNudgeDismissed: false,
   sessionLikedKeys: new Set(),
+  occasion: '',        // '' | 'everyday' | 'special' | 'gift'
+  priceFilter: 'all', // 'all' | 'under10' | '10to20' | 'over20'
+  moodPromptShown: false,
 };
+
+let _pendingMoodPrompt = false; // set by checkAllLiked, consumed by handleSearch patch
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -320,7 +325,8 @@ function renderCigar(cigar, index) {
           <div class="strength-fill"
                style="width:${pct}%; background: linear-gradient(to right, var(--strength-low), var(--strength-med), var(--strength-high))"></div>
         </div>
-        <span class="strength-label">Strong</span>
+        <span class="strength-label">Bold</span>
+        <span class="strength-badge">${escapeHtml(label)}</span>
       </div>
 
       <div class="card-notes">
@@ -355,9 +361,38 @@ function renderCigar(cigar, index) {
 
 
 
+// ---------------------------------------------------------------------------
+// Price filter helpers
+// ---------------------------------------------------------------------------
+
+function pricePassesFilter(cigar) {
+  if (state.priceFilter === 'all') return true;
+  const raw = cigar.priceRange || '';
+  // Extract the lower bound number from e.g. "$6-$8" or "$15-$20"
+  const match = raw.match(/\$(\d+)/);
+  const low = match ? parseInt(match[1], 10) : 999;
+  if (state.priceFilter === 'under10')  return low < 10;
+  if (state.priceFilter === '10to20')   return low >= 10 && low <= 20;
+  if (state.priceFilter === 'over20')   return low > 20;
+  return true;
+}
+
+function setPriceFilter(val) {
+  state.priceFilter = val;
+  document.querySelectorAll('.price-filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.price === val);
+  });
+  renderResults();
+}
+
 function renderResults() {
   if (!state.currentResults.length) { showEmptyState(); return; }
-  resultsEl.innerHTML = `<div class="grid">${state.currentResults.map((c, i) => renderCigar(c, i)).join('')}</div>`;
+  const visible = state.currentResults.filter(pricePassesFilter);
+  if (!visible.length) {
+    resultsEl.innerHTML = `<div class="grid" style="padding:32px 0;text-align:center;color:var(--muted)">No cigars in that price range from these results. Try a different filter or a new search.</div>`;
+  } else {
+    resultsEl.innerHTML = `<div class="grid">${visible.map((c, i) => renderCigar(c, i)).join('')}</div>`;
+  }
   syncButtons();
 }
 
@@ -532,7 +567,18 @@ async function handleSearch(e) {
     return;
   }
 
-  resetForQuery(query);
+  // Bake occasion context into the query sent to the API
+  const OCCASION_HINTS = {
+    everyday:  'everyday casual affordable accessible approachable daily smoke',
+    special:   'special occasion premium celebratory milestone luxurious gift-worthy',
+    gift:      'gift for cigar lover impressive presentation premium box-worthy',
+  };
+  const enriched = state.occasion && OCCASION_HINTS[state.occasion]
+    ? `${query} — ${OCCASION_HINTS[state.occasion]}`
+    : query;
+
+  resetForQuery(enriched);
+  state.currentQuery = query; // keep display query clean
   clearBtn.style.display = 'inline-flex';
 
   const all = await fetchRecommendations();
@@ -549,6 +595,7 @@ async function handleSearch(e) {
   state.buffer         = clean.slice(3);
   rememberSeen(all);
   renderResults();
+  showPriceFilterBar(true);
   setStatus('');
 }
 
@@ -660,6 +707,7 @@ function checkAllLiked() {
     `${topNotes.length ? ', ' + topNotes.join(', ') : ''}. Show me options I haven't seen yet.`;
 
   setStatus('Arthur noticed you loved all 3 — going deeper…', { persistent: false });
+  _pendingMoodPrompt = true;
 
   setTimeout(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -705,9 +753,13 @@ function handleClear() {
   state.buffer         = [];
   state.disliked.clear();
   state.seen.clear();
+  state.priceFilter    = 'all';
+  state.moodPromptShown = false;
   saveLikedToStorage(state.liked);
   queryInput.value = '';
   clearBtn.style.display = 'none';
+  showPriceFilterBar(false);
+  document.getElementById('mood-prompt')?.remove();
   setStatus('');
   showEmptyState();
 }
@@ -798,6 +850,153 @@ resultsEl.addEventListener('click', async e => {
     form.dispatchEvent(new Event('submit', { cancelable: true }));
   }
 });
+
+// ---------------------------------------------------------------------------
+// Price filter bar visibility
+// ---------------------------------------------------------------------------
+
+function showPriceFilterBar(visible) {
+  const bar = document.getElementById('priceFilterBar');
+  if (!bar) return;
+  bar.style.display = visible ? 'flex' : 'none';
+  if (!visible) {
+    // reset active state
+    bar.querySelectorAll('.price-filter-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.price === 'all'));
+    state.priceFilter = 'all';
+  }
+}
+
+document.getElementById('priceFilterBar')?.addEventListener('click', e => {
+  const btn = e.target.closest('.price-filter-btn');
+  if (!btn) return;
+  setPriceFilter(btn.dataset.price);
+});
+
+// ---------------------------------------------------------------------------
+// Occasion mode
+// ---------------------------------------------------------------------------
+
+document.getElementById('occasionBar')?.addEventListener('click', e => {
+  const btn = e.target.closest('.occasion-btn');
+  if (!btn) return;
+  state.occasion = btn.dataset.occasion;
+  document.querySelectorAll('.occasion-btn').forEach(b =>
+    b.classList.toggle('active', b === btn));
+  // Update placeholder to reflect occasion
+  const placeholders = {
+    everyday: 'Flavor, brand, or what you\'re drinking — everyday smoke',
+    special:  'Flavor, brand, or pairing — special occasion',
+    gift:     'Who\'s it for? Brand, profile, or budget',
+    '':       'Tell us what you like (brand, profile, drink)',
+  };
+  queryInput.placeholder = placeholders[state.occasion] || placeholders[''];
+});
+
+// ---------------------------------------------------------------------------
+// Mood prompt — show after all-3-liked auto-search completes
+// ---------------------------------------------------------------------------
+
+function showMoodPrompt() {
+  if (state.moodPromptShown || document.getElementById('mood-prompt')) return;
+  state.moodPromptShown = true;
+  const el = document.createElement('div');
+  el.id = 'mood-prompt';
+  el.className = 'mood-prompt';
+  el.innerHTML = `
+    <span>Want to explore a completely different style?</span>
+    <button type="button" class="mood-explore">Start fresh</button>
+    <button type="button" class="mood-dismiss" aria-label="Dismiss">&times;</button>`;
+  el.querySelector('.mood-explore').addEventListener('click', () => {
+    el.remove();
+    handleClear();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  el.querySelector('.mood-dismiss').addEventListener('click', () => el.remove());
+  resultsEl.insertAdjacentElement('beforebegin', el);
+}
+
+// ---------------------------------------------------------------------------
+// Shareable picks
+// ---------------------------------------------------------------------------
+
+function buildShareUrl() {
+  const data = loadLikedData();
+  if (!data.length) return null;
+  const keys = data.map(c => encodeURIComponent(c.key)).join(',');
+  const url = new URL(window.location.href);
+  url.search = '';
+  url.searchParams.set('liked', keys);
+  return url.toString();
+}
+
+function showShareBar() {
+  if (document.getElementById('share-bar')) return;
+  const bar = document.createElement('div');
+  bar.id = 'share-bar';
+  bar.className = 'share-bar';
+  bar.innerHTML = `<button type="button" class="share-btn" id="sharePicksBtn">🔗 Share my picks</button>`;
+  bar.querySelector('#sharePicksBtn').addEventListener('click', () => {
+    const url = buildShareUrl();
+    if (!url) { setStatus('Like at least one cigar to share your picks.', { persistent: false }); return; }
+    navigator.clipboard.writeText(url).then(() => {
+      setStatus('Link copied — share it with anyone!', { persistent: false });
+    }).catch(() => {
+      // Fallback: show the URL in status
+      setStatus('Copy this link: ' + url, { persistent: false });
+    });
+  });
+  document.getElementById('recap-drawer')
+    ? document.getElementById('recap-drawer').insertAdjacentElement('beforebegin', bar)
+    : document.body.appendChild(bar);
+}
+
+// Sync share bar whenever liked state changes
+const _origSyncRecapDrawer = syncRecapDrawer;
+syncRecapDrawer = function() {
+  _origSyncRecapDrawer();
+  const data = loadLikedData();
+  if (data.length > 0) {
+    showShareBar();
+  } else {
+    document.getElementById('share-bar')?.remove();
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Wire mood prompt into handleSearch results
+// ---------------------------------------------------------------------------
+
+// Patch handleSearch to inject mood prompt after all-3-liked auto-search results
+const _origHandleSearch = handleSearch;
+handleSearch = async function(e) {
+  await _origHandleSearch(e);
+  if (_pendingMoodPrompt) {
+    _pendingMoodPrompt = false;
+    setTimeout(showMoodPrompt, 400);
+    showPriceFilterBar(true);
+  }
+};
+form.removeEventListener('submit', _origHandleSearch);
+form.addEventListener('submit', handleSearch);
+
+// ---------------------------------------------------------------------------
+// Load shared picks from URL on page load
+// ---------------------------------------------------------------------------
+
+(function loadSharedPicks() {
+  const params = new URLSearchParams(window.location.search);
+  const liked = params.get('liked');
+  if (!liked) return;
+  try {
+    const keys = liked.split(',').map(decodeURIComponent).filter(Boolean);
+    if (!keys.length) return;
+    // Merge shared keys into liked state (don't overwrite existing)
+    keys.forEach(k => state.liked.add(k));
+    saveLikedToStorage(state.liked);
+    setStatus(`Loaded ${keys.length} shared pick${keys.length > 1 ? 's' : ''} — heart any card to remember it.`, { persistent: false });
+  } catch {}
+})();
 
 // ---------------------------------------------------------------------------
 // Init
