@@ -878,14 +878,15 @@ document.getElementById('priceFilterBar')?.addEventListener('click', e => {
     setPriceFilter('all');
     return;
   }
-  // Trigger a fresh 3-recommendation search for the selected price range
-  const queryMap = {
-    under10: 'budget under 10 dollars cheap affordable',
-    '10to20': 'mid-range cigar between 10 and 20 dollars',
-    over20:  'premium cigar over 20 dollars splurge',
+  // Trigger a fresh search combining the original query with the price constraint
+  const priceSuffix = {
+    under10: 'under $10',
+    '10to20': 'between $10 and $20',
+    over20:  'over $20',
   };
+  const baseQuery = state.currentQuery || 'cigar recommendation';
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  queryInput.value = queryMap[price] || '';
+  queryInput.value = `${baseQuery}, price ${priceSuffix[price]}`;
   form.dispatchEvent(new Event('submit', { cancelable: true }));
 });
 

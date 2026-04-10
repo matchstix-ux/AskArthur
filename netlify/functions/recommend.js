@@ -331,6 +331,13 @@ First, read the intent:
 - If the query describes a cigar, brand, flavor profile, occasion, or preference (spicy, full body, like a Padron, after dinner smoke, gift for someone, etc.) — treat this as a PREFERENCE request. Select cigars that best match that taste or need.
 - If it's both (e.g. "bourbon and spicy") — honor both signals.
 
+Brand profile rules (CRITICAL — treat brand mentions as strength/flavor cues, not just name filters):
+- Macanudo, Ashton, Romeo y Julieta, Hoyo de Monterrey, Davidoff → mild (strength 4–5), creamy/cedar profile. ONLY recommend mild or mild-medium cigars.
+- H. Upmann, Montecristo, Arturo Fuente → mild-medium (strength 5–6), cedar/nutty profile.
+- Cohiba, Oliva → medium (strength 6–7).
+- Padron, Liga Privada/Drew Estate → full-bodied (strength 7–9).
+When the query names a brand, use that brand's implied strength range to guide your picks — never recommend a full-bodied cigar when the customer referenced a mild brand like Macanudo.
+
 Pairing principles to apply when relevant:
 - Bourbon/whiskey → oak, leather, vanilla, caramel notes complement; pepper and spice contrast nicely
 - Espresso/coffee → echo with cocoa, chocolate, cream; avoid floral or citrus
@@ -350,7 +357,7 @@ Your task:
 Rules:
 - Exactly 6 selections
 - Use the exact index numbers above
-- Vary strength and price across selections
+- Vary strength and price across selections, BUT respect any explicit price constraint in the query (e.g. "under $10", "between $10 and $20", "over $20") — prioritize candidates in that range
 - Never explain what the cigar tastes like in isolation — always connect it to what the customer asked for
 - The "why" field is REQUIRED for every entry — never omit it or leave it empty
 
@@ -659,6 +666,25 @@ const STRENGTH_KEYWORDS = {
   mild: [4, 5], mellow: [4, 5], light: [4, 5],
 };
 
+// Brand → implied strength profile
+// When a user mentions a brand by name, we treat it as a profile cue
+// (e.g. "like a Macanudo" means mild/creamy, not medium/full)
+const BRAND_STRENGTH_PROFILES = {
+  'macanudo':           { strengthRange: [4, 5], flavorBoost: ['cream', 'cedar', 'nuts'] },
+  'ashton':             { strengthRange: [4, 6], flavorBoost: ['cream', 'cedar', 'nuts'] },
+  'romeo y julieta':    { strengthRange: [4, 6], flavorBoost: ['cedar', 'sweetness', 'nuts'] },
+  'hoyo de monterrey':  { strengthRange: [4, 5], flavorBoost: ['cream', 'cedar', 'floral'] },
+  'davidoff':           { strengthRange: [4, 6], flavorBoost: ['cream', 'cedar', 'nuts'] },
+  'h upmann':           { strengthRange: [5, 6], flavorBoost: ['cream', 'cedar', 'nuts'] },
+  'montecristo':        { strengthRange: [5, 7], flavorBoost: ['cedar', 'nuts', 'earth'] },
+  'romeo':              { strengthRange: [4, 6], flavorBoost: ['cedar', 'sweetness', 'nuts'] },
+  'arturo fuente':      { strengthRange: [5, 6], flavorBoost: ['cedar', 'sweetness', 'spice'] },
+  'cohiba':             { strengthRange: [6, 7], flavorBoost: ['cedar', 'spice', 'earth'] },
+  'oliva':              { strengthRange: [6, 8], flavorBoost: ['cedar', 'spice', 'chocolate'] },
+  'padron':             { strengthRange: [7, 9], flavorBoost: ['cocoa', 'espresso', 'earth'] },
+  'drew estate':        { strengthRange: [7, 9], flavorBoost: ['coffee', 'cocoa', 'spice'] },
+};
+
 // Price keywords → price-range lower-bound band
 const PRICE_KEYWORDS = {
   budget: [0, 7], cheap: [0, 7], affordable: [0, 9],
@@ -689,6 +715,22 @@ function getCigarKey(cigar) {
   return `${norm(cigar.brand)}::${norm(cigar.name)}`;
 }
 
+// Detect which brand profiles are implied by the query tokens
+function getBrandProfiles(tokens) {
+  const profiles = [];
+  for (const token of tokens) {
+    // Direct match
+    if (BRAND_STRENGTH_PROFILES[token]) { profiles.push(BRAND_STRENGTH_PROFILES[token]); continue; }
+    // Via alias → canonical
+    const canonical = BRAND_ALIASES[token];
+    if (canonical) {
+      const canonKey = norm(canonical);
+      if (BRAND_STRENGTH_PROFILES[canonKey]) profiles.push(BRAND_STRENGTH_PROFILES[canonKey]);
+    }
+  }
+  return profiles;
+}
+
 function scoreCigar(cigar, tokens) {
   let score = 0;
   const notes    = cigar.flavorNotes.map(n => n.toLowerCase());
@@ -696,6 +738,20 @@ function scoreCigar(cigar, tokens) {
   const nameLow  = norm(cigar.name);
   const strength = cigar.strength;
   const priceLow = parsePriceLow(cigar.priceRange);
+
+  // Apply implied brand profile boosts/penalties
+  const brandProfiles = getBrandProfiles(tokens);
+  for (const profile of brandProfiles) {
+    const [sMin, sMax] = profile.strengthRange;
+    if (strength >= sMin && strength <= sMax) {
+      score += 8; // strongly reward cigars in the same strength band
+    } else {
+      score -= 4; // penalise cigars outside the implied strength range
+    }
+    for (const flavorTarget of profile.flavorBoost) {
+      if (notes.includes(flavorTarget)) score += 3;
+    }
+  }
 
   for (const token of tokens) {
     if (brandLow.includes(token) || nameLow.includes(token)) { score += 10; continue; }
@@ -809,9 +865,23 @@ exports.handler = async function (event) {
       return true;
     });
 
+    // Detect explicit price constraint in query (e.g. from price chip: "under $10", "between $10 and $20", "over $20")
+    let priceConstraint = null;
+    if (/under\s*\$?10|price.*under.*10/i.test(rawQuery))      priceConstraint = c => parsePriceLow(c.priceRange) < 10;
+    else if (/between\s*\$?10.*\$?20|10.*and.*20|\$10.*\$20/i.test(rawQuery)) priceConstraint = c => { const p = parsePriceLow(c.priceRange); return p >= 10 && p <= 20; };
+    else if (/over\s*\$?20|above\s*\$?20/i.test(rawQuery))    priceConstraint = c => parsePriceLow(c.priceRange) > 15;
+
     // Pre-filter to top 20 candidates for GPT — broad enough for nuance,
-    // small enough to keep tokens low and latency fast
-    let candidates = pool.slice(0, 20);
+    // small enough to keep tokens low and latency fast.
+    // When a price constraint is present, prioritise in-range candidates first.
+    let candidates;
+    if (priceConstraint) {
+      const inRange  = pool.filter(priceConstraint).slice(0, 16);
+      const outRange = pool.filter(c => !priceConstraint(c)).slice(0, 4);
+      candidates = [...inRange, ...outRange].slice(0, 20);
+    } else {
+      candidates = pool.slice(0, 20);
+    }
 
     if (candidates.length < 6) {
       const used = new Set(candidates.map(getCigarKey));
