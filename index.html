@@ -327,22 +327,15 @@
 
       .about-grid { grid-template-columns: 1fr; }
 
-      /* Card actions — 2×2 grid so buttons have room to breathe */
-      .actions {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr;
-        gap: 6px;
-      }
-      .actions .not-for-me,
-      .actions .more-like-this {
-        flex: unset !important;
-      }
+      /* Card actions — keep single row, shrink text and padding */
       .actions button,
       .actions .btn-buy {
-        font-size: 0.8rem;
-        padding: 9px 6px;
-        width: 100%;
+        font-size: 0.75rem;
+        padding: 8px 4px;
       }
+      /* Shorten 'Not for me' and 'Replace' labels on narrow screens */
+      .actions .not-for-me .label-long { display: none; }
+      .actions .not-for-me .label-short { display: inline; }
 
       /* Occasion bar — fixed 2-col grid so Special Occasion never wraps */
       .occasion-bar {
@@ -487,6 +480,7 @@
       flex: 1.2;
       color: var(--muted);
     }
+    .actions .not-for-me .label-short { display: none; }
     .actions button:focus, .actions button:focus-visible {
       outline: none;
       box-shadow: none;

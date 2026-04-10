@@ -346,7 +346,7 @@ function renderCigar(cigar, index) {
         <button type="button" class="not-for-me${notForMe ? ' active' : ''}"
                 aria-pressed="${notForMe}"
                 title="Not for me — Arthur won’t recommend this again">
-          ${notForMe ? '✕ Not for me' : '🚫 Not for me'}
+          ${notForMe ? '✕' : '🚫'} <span class="label-long">Not for me</span><span class="label-short">Pass</span>
         </button>
         <button type="button" class="dislike" title="Swap for a different recommendation">
           🔄 Replace
