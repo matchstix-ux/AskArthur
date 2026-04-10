@@ -214,7 +214,7 @@ function buildRecapDrawer() {
             <div class="recap-brand">${escapeHtml(c.brand)}${c.priceRange ? ' &middot; ' + escapeHtml(c.priceRange) : ''}</div>
           </div>
           <a class="recap-buy btn-buy"
-             href="https://www.famous-smoke.com/catalogsearch/result/?q=${encodeURIComponent(c.name)}"
+             href="https://www.famous-smoke.com/catalogsearch/result/?q=${encodeURIComponent(c.brand + ' ' + c.name)}"
              target="_blank" rel="noopener noreferrer">🛒 Buy</a>
         </div>`).join('')}
       <div class="recap-footer">
@@ -343,7 +343,7 @@ function renderCigar(cigar, index) {
           🔄 Replace
         </button>
         <a class="btn-buy"
-           href="https://www.famous-smoke.com/catalogsearch/result/?q=${encodeURIComponent(cigar.name)}"
+           href="https://www.famous-smoke.com/catalogsearch/result/?q=${encodeURIComponent(cigar.brand + ' ' + cigar.name)}"
            target="_blank"
            rel="noopener noreferrer"
            title="Find at Famous Smoke Shop">
