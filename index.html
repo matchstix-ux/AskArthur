@@ -326,6 +326,39 @@
       .hint-chips { padding: 0 4px; }
 
       .about-grid { grid-template-columns: 1fr; }
+
+      /* Card actions — 2×2 grid so buttons have room to breathe */
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+      .actions .not-for-me { flex: unset; }
+      .actions .more-like-this { flex: unset; }
+      .actions button,
+      .actions .btn-buy {
+        font-size: 0.8rem;
+        padding: 9px 6px;
+      }
+
+      /* Occasion bar — fixed 2-col grid so Special Occasion never wraps */
+      .occasion-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      .occasion-btn {
+        font-size: 0.8rem;
+        padding: 8px 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* Price filter — slightly larger touch targets */
+      .price-filter-btn {
+        padding: 6px 16px;
+        font-size: 0.82rem;
+      }
     }
 
     /* ── Cards ── */
