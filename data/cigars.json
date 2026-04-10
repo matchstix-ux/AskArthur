@@ -3057,5 +3057,185 @@
       "Cedar",
       "Honey"
     ]
+  },
+  {
+    "name": "Ashton Classic Corona",
+    "brand": "Ashton",
+    "strength": 2,
+    "priceRange": "$7-$10",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Nuts",
+      "Sweetness"
+    ]
+  },
+  {
+    "name": "Ashton Classic Double Magnum",
+    "brand": "Ashton",
+    "strength": 2,
+    "priceRange": "$9-$13",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Honey",
+      "Nuts"
+    ]
+  },
+  {
+    "name": "Davidoff Grand Cru No. 1",
+    "brand": "Davidoff",
+    "strength": 2,
+    "priceRange": "$18-$24",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Nuts",
+      "Floral"
+    ]
+  },
+  {
+    "name": "Romeo y Julieta 1875 Corona",
+    "brand": "Romeo y Julieta",
+    "strength": 2,
+    "priceRange": "$5-$8",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Sweetness",
+      "Nuts"
+    ]
+  },
+  {
+    "name": "Romeo y Julieta Reserva Real Connecticut",
+    "brand": "Romeo y Julieta",
+    "strength": 2,
+    "priceRange": "$7-$10",
+    "flavorNotes": [
+      "Cream",
+      "Honey",
+      "Cedar",
+      "Floral"
+    ]
+  },
+  {
+    "name": "Montecristo White Series Rothschilde",
+    "brand": "Montecristo",
+    "strength": 3,
+    "priceRange": "$8-$12",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Nuts",
+      "Sweetness"
+    ]
+  },
+  {
+    "name": "H. Upmann 1844 Connecticut Robusto",
+    "brand": "H. Upmann",
+    "strength": 2,
+    "priceRange": "$6-$9",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Nuts",
+      "Honey"
+    ]
+  },
+  {
+    "name": "H. Upmann Banker Acquisition Robusto",
+    "brand": "H. Upmann",
+    "strength": 3,
+    "priceRange": "$9-$13",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Sweetness",
+      "Floral"
+    ]
+  },
+  {
+    "name": "Arturo Fuente Brevas Royale",
+    "brand": "Arturo Fuente",
+    "strength": 2,
+    "priceRange": "$5-$8",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Nuts",
+      "Sweetness"
+    ]
+  },
+  {
+    "name": "Hoyo de Monterrey Excalibur No. 1",
+    "brand": "Hoyo de Monterrey",
+    "strength": 2,
+    "priceRange": "$7-$11",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Floral",
+      "Sweetness"
+    ]
+  },
+  {
+    "name": "Hoyo de Monterrey Rothschild",
+    "brand": "Hoyo de Monterrey",
+    "strength": 2,
+    "priceRange": "$5-$8",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Nuts",
+      "Honey"
+    ]
+  },
+  {
+    "name": "Nub Connecticut Robusto",
+    "brand": "Nub",
+    "strength": 3,
+    "priceRange": "$7-$10",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Nuts",
+      "Sweetness"
+    ]
+  },
+  {
+    "name": "Perdomo Connecticut Robusto",
+    "brand": "Perdomo",
+    "strength": 3,
+    "priceRange": "$6-$9",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Honey",
+      "Nuts"
+    ]
+  },
+  {
+    "name": "CAO Connecticut Robusto",
+    "brand": "CAO",
+    "strength": 3,
+    "priceRange": "$6-$9",
+    "flavorNotes": [
+      "Cream",
+      "Nuts",
+      "Cedar",
+      "Sweetness"
+    ]
+  },
+  {
+    "name": "Oliva Connecticut Reserve Robusto",
+    "brand": "Oliva",
+    "strength": 3,
+    "priceRange": "$7-$10",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Honey",
+      "Nuts"
+    ]
   }
 ]

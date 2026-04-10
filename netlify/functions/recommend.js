@@ -259,7 +259,22 @@ const ALL_CIGARS = [
   {"name":"Macanudo Cafe Hyde Park","brand":"Macanudo","strength":2,"priceRange":"$5-$8","flavorNotes":["Cream","Cedar","Nuts","Sweetness"]},
   {"name":"Macanudo Cafe Hampton Court","brand":"Macanudo","strength":2,"priceRange":"$6-$9","flavorNotes":["Cream","Cedar","Floral","Nuts"]},
   {"name":"Macanudo Cafe Duke of Devon","brand":"Macanudo","strength":1,"priceRange":"$5-$7","flavorNotes":["Cream","Sweetness","Floral","Cedar"]},
-  {"name":"Macanudo Cafe Portofino","brand":"Macanudo","strength":2,"priceRange":"$5-$8","flavorNotes":["Cream","Nuts","Cedar","Honey"]}
+  {"name":"Macanudo Cafe Portofino","brand":"Macanudo","strength":2,"priceRange":"$5-$8","flavorNotes":["Cream","Nuts","Cedar","Honey"]},
+  {"name":"Ashton Classic Corona","brand":"Ashton","strength":2,"priceRange":"$7-$10","flavorNotes":["Cream","Cedar","Nuts","Sweetness"]},
+  {"name":"Ashton Classic Double Magnum","brand":"Ashton","strength":2,"priceRange":"$9-$13","flavorNotes":["Cream","Cedar","Honey","Nuts"]},
+  {"name":"Davidoff Grand Cru No. 1","brand":"Davidoff","strength":2,"priceRange":"$18-$24","flavorNotes":["Cream","Cedar","Nuts","Floral"]},
+  {"name":"Romeo y Julieta 1875 Corona","brand":"Romeo y Julieta","strength":2,"priceRange":"$5-$8","flavorNotes":["Cream","Cedar","Sweetness","Nuts"]},
+  {"name":"Romeo y Julieta Reserva Real Connecticut","brand":"Romeo y Julieta","strength":2,"priceRange":"$7-$10","flavorNotes":["Cream","Honey","Cedar","Floral"]},
+  {"name":"Montecristo White Series Rothschilde","brand":"Montecristo","strength":3,"priceRange":"$8-$12","flavorNotes":["Cream","Cedar","Nuts","Sweetness"]},
+  {"name":"H. Upmann 1844 Connecticut Robusto","brand":"H. Upmann","strength":2,"priceRange":"$6-$9","flavorNotes":["Cream","Cedar","Nuts","Honey"]},
+  {"name":"H. Upmann Banker Acquisition Robusto","brand":"H. Upmann","strength":3,"priceRange":"$9-$13","flavorNotes":["Cream","Cedar","Sweetness","Floral"]},
+  {"name":"Arturo Fuente Brevas Royale","brand":"Arturo Fuente","strength":2,"priceRange":"$5-$8","flavorNotes":["Cream","Cedar","Nuts","Sweetness"]},
+  {"name":"Hoyo de Monterrey Excalibur No. 1","brand":"Hoyo de Monterrey","strength":2,"priceRange":"$7-$11","flavorNotes":["Cream","Cedar","Floral","Sweetness"]},
+  {"name":"Hoyo de Monterrey Rothschild","brand":"Hoyo de Monterrey","strength":2,"priceRange":"$5-$8","flavorNotes":["Cream","Cedar","Nuts","Honey"]},
+  {"name":"Nub Connecticut Robusto","brand":"Nub","strength":3,"priceRange":"$7-$10","flavorNotes":["Cream","Cedar","Nuts","Sweetness"]},
+  {"name":"Perdomo Connecticut Robusto","brand":"Perdomo","strength":3,"priceRange":"$6-$9","flavorNotes":["Cream","Cedar","Honey","Nuts"]},
+  {"name":"CAO Connecticut Robusto","brand":"CAO","strength":3,"priceRange":"$6-$9","flavorNotes":["Cream","Nuts","Cedar","Sweetness"]},
+  {"name":"Oliva Connecticut Reserve Robusto","brand":"Oliva","strength":3,"priceRange":"$7-$10","flavorNotes":["Cream","Cedar","Honey","Nuts"]}
 ];
 
 
@@ -746,16 +761,17 @@ function scoreCigar(cigar, tokens) {
   const priceLow = parsePriceLow(cigar.priceRange);
 
   // Apply implied brand profile boosts/penalties
+  // These are strong signals — brand mention overrides generic occasion/price words
   const brandProfiles = getBrandProfiles(tokens);
   for (const profile of brandProfiles) {
     const [sMin, sMax] = profile.strengthRange;
     if (strength >= sMin && strength <= sMax) {
-      score += 8; // strongly reward cigars in the same strength band
+      score += 15; // strongly reward cigars in the same strength band
     } else {
-      score -= 4; // penalise cigars outside the implied strength range
+      score -= 12; // hard penalise cigars outside the implied strength range
     }
     for (const flavorTarget of profile.flavorBoost) {
-      if (notes.includes(flavorTarget)) score += 3;
+      if (notes.includes(flavorTarget)) score += 4;
     }
   }
 
