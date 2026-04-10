@@ -219,7 +219,7 @@ function buildRecapDrawer() {
             <div class="recap-brand">${escapeHtml(c.brand)}${c.priceRange ? ' &middot; ' + escapeHtml(c.priceRange) : ''}</div>
           </div>
           <a class="recap-buy btn-buy"
-             href="https://www.famous-smoke.com/catalogsearch/result/?q=${encodeURIComponent(c.brand + ' ' + c.name)}"
+             href="https://www.google.com/search?q=${encodeURIComponent(c.brand + ' ' + c.name + ' cigar')}"
              target="_blank" rel="noopener noreferrer">🛒 Buy</a>
         </div>`).join('')}
       <div class="recap-footer">
@@ -261,7 +261,7 @@ function setStatus(msg, { persistent = false } = {}) {
 const EMPTY_STATE_HTML = `
   <div class="empty-state">
     <div class="ember">🔥</div>
-    <p>Let Arthur Find You the Right Cigar from our Humidor</p>
+    <p>Let Arthur Find You the Right Cigar</p>
     <div class="hint-chips">
       <button type="button" class="hint-chip" data-query="spicy and full body">Spicy &amp; Full-Bodied</button>
       <button type="button" class="hint-chip" data-query="creamy and smooth mild">Creamy &amp; Smooth</button>
@@ -352,10 +352,10 @@ function renderCigar(cigar, index) {
           🔄 Replace
         </button>
         <a class="btn-buy"
-           href="https://www.famous-smoke.com/catalogsearch/result/?q=${encodeURIComponent(cigar.brand + ' ' + cigar.name)}"
+           href="https://www.google.com/search?q=${encodeURIComponent(cigar.brand + ' ' + cigar.name + ' cigar')}"
            target="_blank"
            rel="noopener noreferrer"
-           title="Find at Famous Smoke Shop">
+           title="Search for this cigar">
           🛒 Buy
         </a>
       </div>
