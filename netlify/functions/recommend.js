@@ -305,10 +305,9 @@ function isRateLimited(ip) {
 
 function strengthLabel(s) {
   if (s <= 3) return 'mild';
-  if (s <= 5) return 'mild-medium';
-  if (s <= 7) return 'medium';
-  if (s <= 8) return 'full-bodied';
-  return 'extra full-bodied';
+  if (s <= 5) return 'medium';
+  if (s <= 8) return 'medium-full';
+  return 'full';
 }
 
 function synthesizeWhy(c) {
@@ -337,14 +336,14 @@ First, read the intent:
 - If it's both (e.g. "bourbon and spicy") — honor both signals.
 
 Brand profile rules (CRITICAL — treat brand mentions as strength/flavor cues, not just name filters):
-- Macanudo (Cafe line), Hoyo de Monterrey → mild (strength 1–3), creamy/cedar profile. ONLY recommend mild cigars.
-- Ashton, Davidoff → mild to mild-medium (strength 2–4), creamy/cedar profile.
-- Romeo y Julieta, H. Upmann → mild-medium (strength 3–5), cedar/nutty profile.
-- Montecristo, Arturo Fuente → mild-medium (strength 4–6), cedar/nutty profile.
-- Cohiba → medium (strength 5–7).
-- Oliva → medium to full (strength 6–8).
-- Padron, Liga Privada/Drew Estate → full-bodied (strength 7–9).
-When the query names a brand, use that brand's implied strength range to guide your picks — never recommend a medium or full-bodied cigar when the customer referenced a mild brand like Macanudo Cafe.
+Strength scale: 1–3 = mild | 4–5 = medium | 6–8 = medium-full | 9–10 = full
+- Macanudo (Cafe line), Hoyo de Monterrey → mild (1–3). ONLY recommend mild cigars.
+- Ashton, Davidoff → mild to medium (1–4).
+- Romeo y Julieta, H. Upmann, Arturo Fuente → medium (3–5).
+- Montecristo, Cohiba → medium (4–5).
+- Oliva → medium to medium-full (5–7).
+- Padron, Liga Privada/Drew Estate → medium-full to full (6–9).
+When the query names a brand, never go outside that brand's implied strength range.
 
 Pairing principles to apply when relevant:
 - Bourbon/whiskey → oak, leather, vanilla, caramel notes complement; pepper and spice contrast nicely
@@ -667,12 +666,10 @@ const FLAVOR_SYNONYMS = {
 
 // Strength keywords → [min, max] on the 4–10 scale
 const STRENGTH_KEYWORDS = {
-  "full body": [8, 10], "full-bodied": [8, 10], fullbodied: [8, 10],
-  full: [8, 10], strong: [8, 10],
-  "medium full": [6, 8], "medium-full": [6, 8],
-  medium: [5, 7], "medium body": [5, 7], "medium-bodied": [5, 7],
-  mild: [1, 3], mellow: [1, 3], light: [1, 3],
-  "mild medium": [3, 5], "mild-medium": [3, 5],
+  full: [9, 10], "full body": [9, 10], "full-bodied": [9, 10], fullbodied: [9, 10], strong: [9, 10],
+  "medium full": [6, 8], "medium-full": [6, 8], "medium full body": [6, 8],
+  medium: [4, 5], "medium body": [4, 5], "medium-bodied": [4, 5],
+  mild: [1, 3], mellow: [1, 3], light: [1, 3], creamy: [1, 3],
 };
 
 // Brand → implied strength profile
@@ -680,18 +677,18 @@ const STRENGTH_KEYWORDS = {
 // (e.g. "like a Macanudo" means mild/creamy, not medium/full)
 const BRAND_STRENGTH_PROFILES = {
   'macanudo':           { strengthRange: [1, 3], flavorBoost: ['cream', 'cedar', 'nuts', 'sweetness'] },
-  'ashton':             { strengthRange: [2, 4], flavorBoost: ['cream', 'cedar', 'nuts'] },
   'hoyo de monterrey':  { strengthRange: [1, 3], flavorBoost: ['cream', 'cedar', 'floral'] },
-  'davidoff':           { strengthRange: [2, 4], flavorBoost: ['cream', 'cedar', 'nuts'] },
+  'ashton':             { strengthRange: [1, 4], flavorBoost: ['cream', 'cedar', 'nuts'] },
+  'davidoff':           { strengthRange: [1, 4], flavorBoost: ['cream', 'cedar', 'nuts'] },
   'romeo y julieta':    { strengthRange: [3, 5], flavorBoost: ['cedar', 'sweetness', 'nuts'] },
   'romeo':              { strengthRange: [3, 5], flavorBoost: ['cedar', 'sweetness', 'nuts'] },
   'h upmann':           { strengthRange: [3, 5], flavorBoost: ['cream', 'cedar', 'nuts'] },
-  'montecristo':        { strengthRange: [4, 6], flavorBoost: ['cedar', 'nuts', 'earth'] },
-  'arturo fuente':      { strengthRange: [4, 6], flavorBoost: ['cedar', 'sweetness', 'spice'] },
-  'cohiba':             { strengthRange: [5, 7], flavorBoost: ['cedar', 'spice', 'earth'] },
-  'oliva':              { strengthRange: [6, 8], flavorBoost: ['cedar', 'spice', 'chocolate'] },
-  'padron':             { strengthRange: [7, 9], flavorBoost: ['cocoa', 'espresso', 'earth'] },
-  'drew estate':        { strengthRange: [7, 9], flavorBoost: ['coffee', 'cocoa', 'spice'] },
+  'arturo fuente':      { strengthRange: [3, 5], flavorBoost: ['cedar', 'sweetness', 'spice'] },
+  'montecristo':        { strengthRange: [4, 5], flavorBoost: ['cedar', 'nuts', 'earth'] },
+  'cohiba':             { strengthRange: [4, 6], flavorBoost: ['cedar', 'spice', 'earth'] },
+  'oliva':              { strengthRange: [5, 7], flavorBoost: ['cedar', 'spice', 'chocolate'] },
+  'padron':             { strengthRange: [6, 8], flavorBoost: ['cocoa', 'espresso', 'earth'] },
+  'drew estate':        { strengthRange: [6, 9], flavorBoost: ['coffee', 'cocoa', 'spice'] },
 };
 
 // Price keywords → price-range lower-bound band
