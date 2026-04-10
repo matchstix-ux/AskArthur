@@ -339,17 +339,15 @@
 
       /* Occasion bar — single row of 4 on mobile */
       .occasion-bar {
-        display: flex;
-        flex-wrap: nowrap;
+        flex-wrap: nowrap !important;
       }
       .occasion-btn {
-        flex: 1;
-        font-size: 0.72rem;
-        padding: 7px 2px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        min-width: 0;
+        min-width: 0 !important;
+        font-size: 0.72rem !important;
+        padding: 7px 3px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
       }
 
       /* Price filter — slightly larger touch targets */
