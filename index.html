@@ -337,17 +337,19 @@
       .actions .not-for-me .label-long { display: none !important; }
       .actions .not-for-me .label-short { display: inline !important; }
 
-      /* Occasion bar — fixed 2-col grid so Special Occasion never wraps */
+      /* Occasion bar — single row of 4 on mobile */
       .occasion-bar {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+        display: flex;
+        flex-wrap: nowrap;
       }
       .occasion-btn {
-        font-size: 0.8rem;
-        padding: 8px 6px;
+        flex: 1;
+        font-size: 0.72rem;
+        padding: 7px 2px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        min-width: 0;
       }
 
       /* Price filter — slightly larger touch targets */
