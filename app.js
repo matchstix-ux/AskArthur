@@ -298,8 +298,8 @@ function renderCigar(cigar, index) {
   const notForMe  = state.dislikedPersistent.has(key);
   const pct       = strengthPercent(cigar.strength);
   const label     = strengthLabel(cigar.strength);
-  const notes     = Array.isArray(cigar.flavorNotes)
-    ? cigar.flavorNotes.map(escapeHtml).join(', ')
+  const pillsHtml = Array.isArray(cigar.flavorNotes) && cigar.flavorNotes.length
+    ? `<div class="flavor-pills">${cigar.flavorNotes.map(n => `<span class="flavor-pill">${escapeHtml(n)}</span>`).join('')}</div>`
     : '';
   const price     = cigar.priceRange ? escapeHtml(cigar.priceRange) : '';
 
@@ -324,9 +324,9 @@ function renderCigar(cigar, index) {
       </div>
 
       <div class="card-notes">
-        ${notes ? `${notes}` : '<em>No flavor notes available</em>'}
+        ${pillsHtml || '<em>No flavor notes available</em>'}
       </div>
-      ${cigar.why ? `<div class="card-why">${escapeHtml(cigar.why)}</div>` : ''}
+      <div class="card-why">${escapeHtml(cigar.why || '')}</div>
 
       <div class="actions">
         <button type="button" class="like ${liked ? 'liked' : ''}"

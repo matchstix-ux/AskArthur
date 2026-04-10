@@ -306,9 +306,17 @@ function strengthLabel(s) {
   return 'extra full-bodied';
 }
 
+function synthesizeWhy(c) {
+  const notes = (c.flavorNotes || []).slice(0, 2).join(' and ');
+  const strength = strengthLabel(c.strength).toLowerCase();
+  return notes
+    ? `Its ${notes} profile makes it a natural fit for what you're after.`
+    : `A ${strength} smoke that matches your request well.`;
+}
+
 async function aiSelectAndExplain(query, candidates) {
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return { results: candidates.slice(0, 6).map(c => ({ ...c, why: null })), aiUsed: false };
+  if (!apiKey) return { results: candidates.slice(0, 6).map(c => ({ ...c, why: synthesizeWhy(c) })), aiUsed: false };
 
   const cigarList = candidates.map((c, i) =>
     `${i}: ${c.name} by ${c.brand} | ${strengthLabel(c.strength)} | ${c.priceRange} | notes: ${c.flavorNotes.join(', ')}`
@@ -337,16 +345,17 @@ ${cigarList}
 
 Your task:
 1. Select the 6 cigars that best serve the customer's intent
-2. For each, write ONE sentence (max 18 words) explaining why. Be specific — mention the flavor connection, pairing chemistry, or profile match. Use second person.
+2. For EVERY selected cigar, write ONE sentence (max 18 words) explaining why. Be specific — mention the flavor connection, pairing chemistry, or profile match. Use second person.
 
 Rules:
 - Exactly 6 selections
 - Use the exact index numbers above
 - Vary strength and price across selections
 - Never explain what the cigar tastes like in isolation — always connect it to what the customer asked for
+- The "why" field is REQUIRED for every entry — never omit it or leave it empty
 
 Respond with ONLY valid JSON, no markdown:
-{"selected":[{"index":0,"why":"..."},{"index":3,"why":"..."}]}`;
+{"selected":[{"index":0,"why":"Arthur picked this because..."},{"index":3,"why":"Arthur picked this because..."}]}`;
 
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -365,7 +374,7 @@ Respond with ONLY valid JSON, no markdown:
 
     if (!res.ok) {
       console.error('OpenAI error:', res.status, await res.text());
-      return { results: candidates.slice(0, 6).map(c => ({ ...c, why: null })), aiUsed: false };
+      return { results: candidates.slice(0, 6).map(c => ({ ...c, why: synthesizeWhy(c) })), aiUsed: false };
     }
 
     const data = await res.json();
@@ -383,7 +392,7 @@ Respond with ONLY valid JSON, no markdown:
       .slice(0, 6)
       .map(s => ({
         ...candidates[s.index],
-        why: typeof s.why === 'string' ? s.why : null,
+        why: (typeof s.why === 'string' && s.why.trim()) ? s.why.trim() : null,
       }));
 
     // Pad to 6 if GPT returned fewer (shouldn't happen, but safe)
@@ -396,11 +405,14 @@ Respond with ONLY valid JSON, no markdown:
       results.push(...extras);
     }
 
+    // Guarantee every result has a why — synthesize from cigar data as last resort
+    results.forEach(c => { if (!c.why) c.why = synthesizeWhy(c); });
+
     return { results, aiUsed: true };
 
   } catch (err) {
     console.error('OpenAI selection failed:', err.message);
-    return { results: candidates.slice(0, 6).map(c => ({ ...c, why: null })), aiUsed: false };
+    return { results: candidates.slice(0, 6).map(c => ({ ...c, why: synthesizeWhy(c) })), aiUsed: false };
   }
 }
 
