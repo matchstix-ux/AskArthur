@@ -781,7 +781,7 @@
     ]
   },
   {
-    "name": "Black Label Trading Co. Bishop’s Blend",
+    "name": "Black Label Trading Co. Bishop\u2019s Blend",
     "brand": "Black Label Trading Co.",
     "strength": 8,
     "priceRange": "$12-$15",
@@ -906,7 +906,7 @@
     ]
   },
   {
-    "name": "Padrón Serie 1926 No. 6",
+    "name": "Padr\u00f3n Serie 1926 No. 6",
     "brand": "Padron",
     "strength": 8,
     "priceRange": "$25-$32",
@@ -957,7 +957,7 @@
     ]
   },
   {
-    "name": "La Aroma de Cuba Pasión Torpedo",
+    "name": "La Aroma de Cuba Pasi\u00f3n Torpedo",
     "brand": "La Aroma de Cuba",
     "strength": 7,
     "priceRange": "$10-$14",
@@ -970,7 +970,7 @@
     ]
   },
   {
-    "name": "Herrera Esteli Norteño Lonsdale",
+    "name": "Herrera Esteli Norte\u00f1o Lonsdale",
     "brand": "Herrera Esteli",
     "strength": 8,
     "priceRange": "$10-$13",
@@ -1123,7 +1123,7 @@
     ]
   },
   {
-    "name": "Padrón Serie 1926 No. 48 Maduro",
+    "name": "Padr\u00f3n Serie 1926 No. 48 Maduro",
     "brand": "Padron",
     "strength": 8,
     "priceRange": "$25-$32",
@@ -1495,7 +1495,7 @@
     ]
   },
   {
-    "name": "Padrón Family Reserve No. 44",
+    "name": "Padr\u00f3n Family Reserve No. 44",
     "brand": "Padron",
     "strength": 8,
     "priceRange": "$30-$38",
@@ -1666,7 +1666,7 @@
     ]
   },
   {
-    "name": "Padrón 3000 Maduro",
+    "name": "Padr\u00f3n 3000 Maduro",
     "brand": "Padron",
     "strength": 7,
     "priceRange": "$7-$10",
@@ -1678,7 +1678,7 @@
     ]
   },
   {
-    "name": "Padrón 2000 Natural",
+    "name": "Padr\u00f3n 2000 Natural",
     "brand": "Padron",
     "strength": 6,
     "priceRange": "$6-$9",
@@ -1766,7 +1766,7 @@
     ]
   },
   {
-    "name": "Montecristo 1935 Anniversary Edición Diamante",
+    "name": "Montecristo 1935 Anniversary Edici\u00f3n Diamante",
     "brand": "Montecristo",
     "strength": 7,
     "priceRange": "$16-$22",
@@ -1904,7 +1904,7 @@
   },
   {
     "name": "Protocol White Tip Robusto",
-    "brand": "Cubariqueño",
+    "brand": "Cubarique\u00f1o",
     "strength": 6,
     "priceRange": "$8-$11",
     "flavorNotes": [
@@ -2113,7 +2113,7 @@
     ]
   },
   {
-    "name": "Padrón 1926 Serie No. 35 Natural",
+    "name": "Padr\u00f3n 1926 Serie No. 35 Natural",
     "brand": "Padron",
     "strength": 8,
     "priceRange": "$22-$28",
@@ -3008,6 +3008,54 @@
       "Dark Chocolate",
       "Leather",
       "Spice"
+    ]
+  },
+  {
+    "name": "Macanudo Cafe Hyde Park",
+    "brand": "Macanudo",
+    "strength": 2,
+    "priceRange": "$5-$8",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Nuts",
+      "Sweetness"
+    ]
+  },
+  {
+    "name": "Macanudo Cafe Hampton Court",
+    "brand": "Macanudo",
+    "strength": 2,
+    "priceRange": "$6-$9",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Floral",
+      "Nuts"
+    ]
+  },
+  {
+    "name": "Macanudo Cafe Duke of Devon",
+    "brand": "Macanudo",
+    "strength": 1,
+    "priceRange": "$5-$7",
+    "flavorNotes": [
+      "Cream",
+      "Sweetness",
+      "Floral",
+      "Cedar"
+    ]
+  },
+  {
+    "name": "Macanudo Cafe Portofino",
+    "brand": "Macanudo",
+    "strength": 2,
+    "priceRange": "$5-$8",
+    "flavorNotes": [
+      "Cream",
+      "Nuts",
+      "Cedar",
+      "Honey"
     ]
   }
 ]

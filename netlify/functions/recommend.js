@@ -255,7 +255,11 @@ const ALL_CIGARS = [
   {"name":"Crowned Heads Le Patite Debutante Robusto","brand":"Crowned Heads","strength":5,"priceRange":"$11-$15","flavorNotes":["Cream","Cedar","Floral","Nuts","Sweetness"]},
   {"name":"Brick House Mighty Mighty Gordo","brand":"Brick House","strength":7,"priceRange":"$7-$10","flavorNotes":["Earth","Leather","Cedar","Spice","Coffee"]},
   {"name":"Diesel Whiskey Row Robusto","brand":"Diesel","strength":7,"priceRange":"$8-$12","flavorNotes":["Oak","Sweetness","Vanilla","Spice","Earth"]},
-  {"name":"Diesel Hair of the Dog Robusto","brand":"Diesel","strength":8,"priceRange":"$9-$13","flavorNotes":["Pepper","Earth","Dark Chocolate","Leather","Spice"]}
+  {"name":"Diesel Hair of the Dog Robusto","brand":"Diesel","strength":8,"priceRange":"$9-$13","flavorNotes":["Pepper","Earth","Dark Chocolate","Leather","Spice"]},
+  {"name":"Macanudo Cafe Hyde Park","brand":"Macanudo","strength":2,"priceRange":"$5-$8","flavorNotes":["Cream","Cedar","Nuts","Sweetness"]},
+  {"name":"Macanudo Cafe Hampton Court","brand":"Macanudo","strength":2,"priceRange":"$6-$9","flavorNotes":["Cream","Cedar","Floral","Nuts"]},
+  {"name":"Macanudo Cafe Duke of Devon","brand":"Macanudo","strength":1,"priceRange":"$5-$7","flavorNotes":["Cream","Sweetness","Floral","Cedar"]},
+  {"name":"Macanudo Cafe Portofino","brand":"Macanudo","strength":2,"priceRange":"$5-$8","flavorNotes":["Cream","Nuts","Cedar","Honey"]}
 ];
 
 
@@ -300,7 +304,8 @@ function isRateLimited(ip) {
 // ---------------------------------------------------------------------------
 
 function strengthLabel(s) {
-  if (s <= 5) return 'mild';
+  if (s <= 3) return 'mild';
+  if (s <= 5) return 'mild-medium';
   if (s <= 7) return 'medium';
   if (s <= 8) return 'full-bodied';
   return 'extra full-bodied';
@@ -332,11 +337,14 @@ First, read the intent:
 - If it's both (e.g. "bourbon and spicy") — honor both signals.
 
 Brand profile rules (CRITICAL — treat brand mentions as strength/flavor cues, not just name filters):
-- Macanudo, Ashton, Romeo y Julieta, Hoyo de Monterrey, Davidoff → mild (strength 4–5), creamy/cedar profile. ONLY recommend mild or mild-medium cigars.
-- H. Upmann, Montecristo, Arturo Fuente → mild-medium (strength 5–6), cedar/nutty profile.
-- Cohiba, Oliva → medium (strength 6–7).
+- Macanudo (Cafe line), Hoyo de Monterrey → mild (strength 1–3), creamy/cedar profile. ONLY recommend mild cigars.
+- Ashton, Davidoff → mild to mild-medium (strength 2–4), creamy/cedar profile.
+- Romeo y Julieta, H. Upmann → mild-medium (strength 3–5), cedar/nutty profile.
+- Montecristo, Arturo Fuente → mild-medium (strength 4–6), cedar/nutty profile.
+- Cohiba → medium (strength 5–7).
+- Oliva → medium to full (strength 6–8).
 - Padron, Liga Privada/Drew Estate → full-bodied (strength 7–9).
-When the query names a brand, use that brand's implied strength range to guide your picks — never recommend a full-bodied cigar when the customer referenced a mild brand like Macanudo.
+When the query names a brand, use that brand's implied strength range to guide your picks — never recommend a medium or full-bodied cigar when the customer referenced a mild brand like Macanudo Cafe.
 
 Pairing principles to apply when relevant:
 - Bourbon/whiskey → oak, leather, vanilla, caramel notes complement; pepper and spice contrast nicely
@@ -663,23 +671,24 @@ const STRENGTH_KEYWORDS = {
   full: [8, 10], strong: [8, 10],
   "medium full": [6, 8], "medium-full": [6, 8],
   medium: [5, 7], "medium body": [5, 7], "medium-bodied": [5, 7],
-  mild: [4, 5], mellow: [4, 5], light: [4, 5],
+  mild: [1, 3], mellow: [1, 3], light: [1, 3],
+  "mild medium": [3, 5], "mild-medium": [3, 5],
 };
 
 // Brand → implied strength profile
 // When a user mentions a brand by name, we treat it as a profile cue
 // (e.g. "like a Macanudo" means mild/creamy, not medium/full)
 const BRAND_STRENGTH_PROFILES = {
-  'macanudo':           { strengthRange: [4, 5], flavorBoost: ['cream', 'cedar', 'nuts'] },
-  'ashton':             { strengthRange: [4, 6], flavorBoost: ['cream', 'cedar', 'nuts'] },
-  'romeo y julieta':    { strengthRange: [4, 6], flavorBoost: ['cedar', 'sweetness', 'nuts'] },
-  'hoyo de monterrey':  { strengthRange: [4, 5], flavorBoost: ['cream', 'cedar', 'floral'] },
-  'davidoff':           { strengthRange: [4, 6], flavorBoost: ['cream', 'cedar', 'nuts'] },
-  'h upmann':           { strengthRange: [5, 6], flavorBoost: ['cream', 'cedar', 'nuts'] },
-  'montecristo':        { strengthRange: [5, 7], flavorBoost: ['cedar', 'nuts', 'earth'] },
-  'romeo':              { strengthRange: [4, 6], flavorBoost: ['cedar', 'sweetness', 'nuts'] },
-  'arturo fuente':      { strengthRange: [5, 6], flavorBoost: ['cedar', 'sweetness', 'spice'] },
-  'cohiba':             { strengthRange: [6, 7], flavorBoost: ['cedar', 'spice', 'earth'] },
+  'macanudo':           { strengthRange: [1, 3], flavorBoost: ['cream', 'cedar', 'nuts', 'sweetness'] },
+  'ashton':             { strengthRange: [2, 4], flavorBoost: ['cream', 'cedar', 'nuts'] },
+  'hoyo de monterrey':  { strengthRange: [1, 3], flavorBoost: ['cream', 'cedar', 'floral'] },
+  'davidoff':           { strengthRange: [2, 4], flavorBoost: ['cream', 'cedar', 'nuts'] },
+  'romeo y julieta':    { strengthRange: [3, 5], flavorBoost: ['cedar', 'sweetness', 'nuts'] },
+  'romeo':              { strengthRange: [3, 5], flavorBoost: ['cedar', 'sweetness', 'nuts'] },
+  'h upmann':           { strengthRange: [3, 5], flavorBoost: ['cream', 'cedar', 'nuts'] },
+  'montecristo':        { strengthRange: [4, 6], flavorBoost: ['cedar', 'nuts', 'earth'] },
+  'arturo fuente':      { strengthRange: [4, 6], flavorBoost: ['cedar', 'sweetness', 'spice'] },
+  'cohiba':             { strengthRange: [5, 7], flavorBoost: ['cedar', 'spice', 'earth'] },
   'oliva':              { strengthRange: [6, 8], flavorBoost: ['cedar', 'spice', 'chocolate'] },
   'padron':             { strengthRange: [7, 9], flavorBoost: ['cocoa', 'espresso', 'earth'] },
   'drew estate':        { strengthRange: [7, 9], flavorBoost: ['coffee', 'cocoa', 'spice'] },
@@ -898,8 +907,8 @@ exports.handler = async function (event) {
     // Special case: 'new to cigars' — force 2 mild + 1 mild/medium
     const isNewToCigars = queryLower.includes('new to cigar') || queryLower.includes('new to cigars') || queryLower.includes('approachable');
     if (isNewToCigars) {
-      const mildPool    = shuffle(ALL_CIGARS.filter(c => c.strength <= 5 && !excluded.has(getCigarKey(c))));
-      const midPool     = shuffle(ALL_CIGARS.filter(c => c.strength === 6 && !excluded.has(getCigarKey(c))));
+      const mildPool    = shuffle(ALL_CIGARS.filter(c => c.strength <= 3 && !excluded.has(getCigarKey(c))));
+      const midPool     = shuffle(ALL_CIGARS.filter(c => c.strength >= 4 && c.strength <= 5 && !excluded.has(getCigarKey(c))));
       const mildPicks   = mildPool.slice(0, 2);
       const midPick     = midPool.slice(0, 1);
       candidates        = [...mildPicks, ...midPick];
