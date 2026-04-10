@@ -873,7 +873,20 @@ function showPriceFilterBar(visible) {
 document.getElementById('priceFilterBar')?.addEventListener('click', e => {
   const btn = e.target.closest('.price-filter-btn');
   if (!btn) return;
-  setPriceFilter(btn.dataset.price);
+  const price = btn.dataset.price;
+  if (price === 'all') {
+    setPriceFilter('all');
+    return;
+  }
+  // Trigger a fresh 3-recommendation search for the selected price range
+  const queryMap = {
+    under10: 'budget under 10 dollars cheap affordable',
+    '10to20': 'mid-range cigar between 10 and 20 dollars',
+    over20:  'premium cigar over 20 dollars splurge',
+  };
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  queryInput.value = queryMap[price] || '';
+  form.dispatchEvent(new Event('submit', { cancelable: true }));
 });
 
 // ---------------------------------------------------------------------------
