@@ -434,7 +434,7 @@ function setLoading(v) {
   const submit = form.querySelector('button[type="submit"]');
   if (submit) {
     submit.disabled = v;
-    submit.textContent = v ? 'Arthur is selecting your cigars…' : 'Get My Recs';
+    submit.textContent = v ? 'Arthur is selecting your cigars…' : 'Ask Arthur';
   }
   queryInput.disabled = v;
   if (v) showLoadingState();
