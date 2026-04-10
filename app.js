@@ -459,7 +459,7 @@ function showErrorState(message, { showRetry = false } = {}) {
   if (showRetry) {
     resultsEl.querySelector('.error-retry').addEventListener('click', () => {
       if (state.currentQuery) {
-        queryInput.value = state.currentQuery;
+        queryInput.value = state.displayQuery || state.currentQuery;
         form.dispatchEvent(new Event('submit', { cancelable: true }));
       } else {
         showEmptyState();
@@ -581,7 +581,7 @@ async function handleSearch(e) {
     : query;
 
   resetForQuery(enriched);
-  state.currentQuery = query; // keep display query clean
+  state.displayQuery = query; // raw query for display / price-chip continuation
   clearBtn.style.display = 'inline-flex';
 
   const all = await fetchRecommendations();
@@ -752,6 +752,7 @@ async function handleNotForMe(index) {
 function handleClear() {
   abortInflight();
   state.currentQuery   = '';
+  state.displayQuery   = '';
   state.currentResults = [];
   state.buffer         = [];
   state.disliked.clear();
@@ -884,7 +885,7 @@ document.getElementById('priceFilterBar')?.addEventListener('click', e => {
     '10to20': 'between $10 and $20',
     over20:  'over $20',
   };
-  const baseQuery = state.currentQuery || 'cigar recommendation';
+  const baseQuery = state.displayQuery || state.currentQuery || 'cigar recommendation';
   window.scrollTo({ top: 0, behavior: 'smooth' });
   queryInput.value = `${baseQuery}, price ${priceSuffix[price]}`;
   form.dispatchEvent(new Event('submit', { cancelable: true }));
