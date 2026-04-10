@@ -284,6 +284,7 @@ function showEmptyState() {
 
   resultsEl.querySelectorAll('.hint-chip').forEach(chip => {
     chip.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       if (chip.dataset.query === '__surprise__') { handleSurpriseMe(); return; }
       queryInput.value = chip.dataset.query;
       form.dispatchEvent(new Event('submit', { cancelable: true }));
@@ -661,6 +662,7 @@ function checkAllLiked() {
   setStatus('Arthur noticed you loved all 3 — going deeper…', { persistent: false });
 
   setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     queryInput.value = query;
     form.dispatchEvent(new Event('submit', { cancelable: true }));
   }, 900);
@@ -759,8 +761,12 @@ function handleResetSession() {
   document.getElementById('drift-nudge')?.remove();
   document.getElementById('recap-drawer')?.remove();
 
-  // Re-render any visible cards to clear liked/not-for-me states
-  if (state.currentResults.length) renderResults();
+  // Re-render cards or refresh the empty state to clear the memory note
+  if (state.currentResults.length) {
+    renderResults();
+  } else {
+    showEmptyState();
+  }
 
   setStatus('All likes cleared — clean slate.');
 }
