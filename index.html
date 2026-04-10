@@ -329,16 +329,19 @@
 
       /* Card actions — 2×2 grid so buttons have room to breathe */
       .actions {
-        display: grid;
+        display: grid !important;
         grid-template-columns: 1fr 1fr;
         gap: 6px;
       }
-      .actions .not-for-me { flex: unset; }
-      .actions .more-like-this { flex: unset; }
+      .actions .not-for-me,
+      .actions .more-like-this {
+        flex: unset !important;
+      }
       .actions button,
       .actions .btn-buy {
         font-size: 0.8rem;
         padding: 9px 6px;
+        width: 100%;
       }
 
       /* Occasion bar — fixed 2-col grid so Special Occasion never wraps */
