@@ -3237,5 +3237,149 @@
       "Honey",
       "Nuts"
     ]
+  },
+  {
+    "name": "Davidoff Aniversario No. 3",
+    "brand": "Davidoff",
+    "strength": 4,
+    "priceRange": "$22-$28",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Nuts",
+      "Honey"
+    ]
+  },
+  {
+    "name": "Ashton VSG Wizard",
+    "brand": "Ashton",
+    "strength": 5,
+    "priceRange": "$20-$26",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Spice",
+      "Earth"
+    ]
+  },
+  {
+    "name": "Arturo Fuente Don Carlos No. 3",
+    "brand": "Arturo Fuente",
+    "strength": 5,
+    "priceRange": "$18-$24",
+    "flavorNotes": [
+      "Cedar",
+      "Sweetness",
+      "Cream",
+      "Nuts"
+    ]
+  },
+  {
+    "name": "Montecristo Platinum Toro",
+    "brand": "Montecristo",
+    "strength": 5,
+    "priceRange": "$18-$24",
+    "flavorNotes": [
+      "Cedar",
+      "Nuts",
+      "Cream",
+      "Earth"
+    ]
+  },
+  {
+    "name": "Romeo y Julieta Vintage No. 5",
+    "brand": "Romeo y Julieta",
+    "strength": 4,
+    "priceRange": "$18-$24",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Floral",
+      "Sweetness"
+    ]
+  },
+  {
+    "name": "H. Upmann Magnum 54",
+    "brand": "H. Upmann",
+    "strength": 4,
+    "priceRange": "$20-$26",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Nuts",
+      "Honey"
+    ]
+  },
+  {
+    "name": "Perdomo Habano Champagne Epicure",
+    "brand": "Perdomo",
+    "strength": 4,
+    "priceRange": "$8-$12",
+    "flavorNotes": [
+      "Cream",
+      "Honey",
+      "Cedar",
+      "Floral"
+    ]
+  },
+  {
+    "name": "Oliva Serie G Maduro Torpedo",
+    "brand": "Oliva",
+    "strength": 5,
+    "priceRange": "$7-$10",
+    "flavorNotes": [
+      "Chocolate",
+      "Cedar",
+      "Cream",
+      "Sweetness"
+    ]
+  },
+  {
+    "name": "Rocky Patel Vintage 1999 Toro",
+    "brand": "Rocky Patel",
+    "strength": 5,
+    "priceRange": "$10-$14",
+    "flavorNotes": [
+      "Cedar",
+      "Cream",
+      "Nuts",
+      "Earth"
+    ]
+  },
+  {
+    "name": "Cohiba Blue Robusto",
+    "brand": "Cohiba",
+    "strength": 5,
+    "priceRange": "$18-$24",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Spice",
+      "Earth"
+    ]
+  },
+  {
+    "name": "CAO Cameroon Churchill",
+    "brand": "CAO",
+    "strength": 4,
+    "priceRange": "$8-$12",
+    "flavorNotes": [
+      "Sweetness",
+      "Cedar",
+      "Nuts",
+      "Cream"
+    ]
+  },
+  {
+    "name": "Alec Bradley American Classic Robusto",
+    "brand": "Alec Bradley",
+    "strength": 4,
+    "priceRange": "$7-$10",
+    "flavorNotes": [
+      "Cream",
+      "Cedar",
+      "Nuts",
+      "Sweetness"
+    ]
   }
 ]
