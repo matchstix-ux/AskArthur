@@ -127,25 +127,25 @@ function isValidCigar(c) {
   return !!(c && typeof c === 'object' && c.name && c.brand);
 }
 
-// Strength 4–10 → 0–100% for the bar, plus a colour class
+// Strength 1–10 → 0–100% for the bar, plus a colour class
 function strengthPercent(s) {
-  const n = Number(s) || 4;
-  return Math.round(((n - 4) / 6) * 100);
+  const n = Number(s) || 1;
+  return Math.round(((n - 1) / 9) * 100);
 }
 
 function strengthColor(s) {
-  const n = Number(s) || 4;
-  if (n <= 5) return 'var(--strength-low)';
-  if (n <= 7) return 'var(--strength-med)';
+  const n = Number(s) || 1;
+  if (n <= 3) return 'var(--strength-low)';
+  if (n <= 8) return 'var(--strength-med)';
   return 'var(--strength-high)';
 }
 
 function strengthLabel(s) {
-  const n = Number(s) || 4;
-  if (n <= 5) return 'Mild';
-  if (n <= 7) return 'Medium';
-  if (n <= 8) return 'Full';
-  return 'Extra Full';
+  const n = Number(s) || 1;
+  if (n <= 3) return 'Mild';
+  if (n <= 5) return 'Medium';
+  if (n <= 8) return 'Medium-Full';
+  return 'Full';
 }
 
 // ---------------------------------------------------------------------------
