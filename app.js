@@ -574,7 +574,7 @@ async function handleSearch(e) {
   const OCCASION_HINTS = {
     everyday:  'everyday casual affordable accessible approachable daily smoke',
     special:   'special occasion premium celebratory milestone luxurious gift-worthy',
-    gift:      'gift for cigar lover impressive presentation premium box-worthy',
+    gift:      'gift for cigar lover well-crafted higher-priced giftable presentation — strength should match the brand or flavor profile, not the occasion',
   };
   const enriched = state.occasion && OCCASION_HINTS[state.occasion]
     ? `${query} — ${OCCASION_HINTS[state.occasion]}`
