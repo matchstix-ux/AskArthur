@@ -371,6 +371,7 @@ Strength scale: 1–3 = mild | 4–5 = medium | 6–8 = medium-full | 9–10 = f
 - Oliva → medium to medium-full (5–7).
 - Padron, Liga Privada/Drew Estate → medium-full to full (6–9).
 When the query names a brand, never go outside that brand's implied strength range.
+Occasion override rule (CRITICAL): If the query contains occasion words like "gift", "special occasion", "premium", "impressive", or "box-worthy" AND also names a brand, the brand's strength profile takes absolute priority. Do NOT use occasion/prestige framing as a reason to recommend stronger cigars. A gift of Macanudo cigars must still be mild (1–3) — just select the nicest, most giftable mild options available.
 
 Pairing principles to apply when relevant:
 - Bourbon/whiskey → oak, leather, vanilla, caramel notes complement; pepper and spice contrast nicely
@@ -779,9 +780,10 @@ function scoreCigar(cigar, tokens) {
   for (const profile of brandProfiles) {
     const [sMin, sMax] = profile.strengthRange;
     if (strength >= sMin && strength <= sMax) {
-      score += 15; // strongly reward cigars in the same strength band
+      score += 25; // strongly reward cigars in the same strength band
     } else {
-      score -= 12; // hard penalise cigars outside the implied strength range
+      score -= 30; // hard penalise cigars outside the implied strength range
+                   // (must dominate any occasion/gift/premium bonus words)
     }
     for (const flavorTarget of profile.flavorBoost) {
       if (notes.includes(flavorTarget)) score += 4;
