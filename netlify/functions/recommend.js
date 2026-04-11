@@ -694,10 +694,9 @@ const FLAVOR_SYNONYMS = {
 
 // Strength keywords → [min, max] on the 4–10 scale
 const STRENGTH_KEYWORDS = {
-  full: [9, 10], "full body": [9, 10], "full-bodied": [9, 10], fullbodied: [9, 10], strong: [9, 10],
+  full: [9, 10], "full body": [9, 10], "full bodied": [9, 10], "full-bodied": [9, 10], fullbodied: [9, 10], strong: [9, 10],
   "medium full": [6, 8], "medium-full": [6, 8], "medium full body": [6, 8],
   medium: [4, 5], "medium body": [4, 5], "medium-bodied": [4, 5], "medium bodied": [4, 5],
-  "full bodied": [9, 10], "full body": [9, 10],
   mild: [1, 3], mellow: [1, 3], light: [1, 3], creamy: [1, 3],
 };
 
