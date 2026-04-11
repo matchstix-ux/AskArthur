@@ -269,11 +269,11 @@ const EMPTY_STATE_HTML = `
       <button type="button" class="hint-chip" data-query="new to cigars something approachable">New to cigars</button>
       <button type="button" class="hint-chip" data-query="morning smoke lighter mild easy draw breakfast">Morning Smoke</button>
       <button type="button" class="hint-chip" data-query="outdoor casual relaxed backyard everyday smoke">Outdoor &amp; Casual</button>
-      <button type="button" class="hint-chip" data-query="celebratory special occasion premium achievement">Celebratory</button>
+      <button type="button" class="hint-chip" data-query="celebratory special occasion milestone achievement well-crafted">Celebratory</button>
       <button type="button" class="hint-chip" data-query="bourbon">Pairs with Bourbon</button>
       <button type="button" class="hint-chip" data-query="espresso coffee">Pairs with Espresso</button>
       <button type="button" class="hint-chip" data-query="ribeye steak dinner">Pairs with Steak</button>
-      <button type="button" class="hint-chip" data-query="gift for cigar lover who smokes premium">Premium Gift</button>
+      <button type="button" class="hint-chip" data-query="gift for cigar lover well-crafted giftable higher-priced">Premium Gift</button>
       <button type="button" class="hint-chip" data-query="budget under 10 dollars cheap affordable">Under $10</button>
       <button type="button" class="hint-chip surprise-chip" data-query="__surprise__">🔥 Surprise Me</button>
     </div>
@@ -573,7 +573,7 @@ async function handleSearch(e) {
   // Bake occasion context into the query sent to the API
   const OCCASION_HINTS = {
     everyday:  'everyday casual affordable accessible approachable daily smoke',
-    special:   'special occasion premium celebratory milestone luxurious gift-worthy',
+    special:   'special occasion celebratory milestone well-crafted higher-priced gift-worthy — strength should match the brand or flavor profile, not the occasion',
     gift:      'gift for cigar lover well-crafted higher-priced giftable presentation — strength should match the brand or flavor profile, not the occasion',
   };
   const enriched = state.occasion && OCCASION_HINTS[state.occasion]
