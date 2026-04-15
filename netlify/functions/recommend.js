@@ -371,6 +371,8 @@ Strength scale: 1–3 = mild | 4–5 = medium | 6–8 = medium-full | 9–10 = f
 - Oliva → medium to medium-full (5–7).
 - Padron, Liga Privada/Drew Estate → medium-full to full (6–9).
 When the query names a brand, never go outside that brand's implied strength range.
+Dry-cured / machine-made cigar rule (CRITICAL): Villiger Export, Café Crème, Toscano, Parodi, Dannemann, and Al Capone are dry-cured machine-made cigars with a completely different character from premium hand-rolled long-filler cigars. They have hay, dried fruit, and tobacco-forward profiles. When the user names any of these brands or the word "dry-cured" appears, recommend ONLY other dry-cured or machine-made cigars of similar style. NEVER recommend premium long-fillers like Padron, Liga Privada, My Father, Oliva, etc. in response to a dry-cured query.
+
 Luxury/premium rule (CRITICAL): Premium, luxury, gift, impressive, and special occasion do NOT mean stronger or bolder. Luxury is about craftsmanship, price, and presentation — not body. A Davidoff Grand Cru ($20+, strength 2) is one of the most premium cigars in the world and is mild. A Dunbarton Sobremesa Brulée, Ashton Classic, or Perdomo Champagne are all gift-worthy luxury cigars that are mild to medium. Never use prestige or occasion framing as a signal to go fuller-bodied. When a gift or special occasion is mentioned without a brand, prioritize well-crafted, higher-priced options across ALL strength levels — let the customer's flavor or brand preference drive strength, not the occasion. When a brand IS mentioned, the brand's strength profile is absolute regardless of occasion words.
 
 Pairing principles to apply when relevant:
@@ -629,6 +631,16 @@ const BRAND_ALIASES = {
   'dunbarton':        'dunbarton tobacco trust',
   'sobremesa':        'dunbarton tobacco trust',
   'umbagog':          'dunbarton tobacco trust',
+
+  // Dry-cured / machine-made
+  'villiger export':  'villiger',
+  'villiger export natural': 'villiger',
+  'villiger export maduro': 'villiger',
+  'villiger export brasil': 'villiger',
+  'villiger export sumatra': 'villiger',
+  'cafe creme':       'café crème',
+  'café creme':       'café crème',
+  'cafe crème':       'café crème',
 };
 
 // Build a reverse lookup: canonical brand token → true
@@ -749,6 +761,14 @@ const BRAND_STRENGTH_PROFILES = {
   'la aroma de cuba':   { strengthRange: [5, 7], flavorBoost: ['cocoa', 'espresso', 'earth'] },
   'herrera esteli':     { strengthRange: [7, 9], flavorBoost: ['dark chocolate', 'espresso', 'earth', 'spice'] },
   'espinosa':           { strengthRange: [5, 7], flavorBoost: ['spice', 'earth', 'cedar'] },
+  // Dry-cured / machine-made brands
+  'villiger':           { strengthRange: [2, 5], flavorBoost: ['hay', 'dried fruit', 'tobacco', 'sweetness'], style: 'dry-cured' },
+  'toscano':            { strengthRange: [5, 7], flavorBoost: ['earth', 'dried fruit', 'tobacco', 'hay'], style: 'dry-cured' },
+  'parodi':             { strengthRange: [5, 7], flavorBoost: ['earth', 'tobacco', 'dried fruit'], style: 'dry-cured' },
+  'dannemann':          { strengthRange: [2, 4], flavorBoost: ['hay', 'sweetness', 'cream', 'tobacco'], style: 'dry-cured' },
+  'cafe creme':         { strengthRange: [1, 3], flavorBoost: ['cream', 'sweetness', 'hay', 'tobacco'], style: 'dry-cured' },
+  'café crème':         { strengthRange: [1, 3], flavorBoost: ['cream', 'sweetness', 'hay', 'tobacco'], style: 'dry-cured' },
+  'al capone':          { strengthRange: [1, 3], flavorBoost: ['sweetness', 'cream', 'vanilla', 'tobacco'], style: 'dry-cured' },
 };
 
 // Price keywords → price-range lower-bound band
@@ -808,6 +828,7 @@ function scoreCigar(cigar, tokens) {
   // Apply implied brand profile boosts/penalties
   // These are strong signals — brand mention overrides generic occasion/price words
   const brandProfiles = getBrandProfiles(tokens);
+  const isDryCuredQuery = brandProfiles.some(p => p.style === 'dry-cured');
   for (const profile of brandProfiles) {
     const [sMin, sMax] = profile.strengthRange;
     if (strength >= sMin && strength <= sMax) {
@@ -818,6 +839,16 @@ function scoreCigar(cigar, tokens) {
     }
     for (const flavorTarget of profile.flavorBoost) {
       if (notes.includes(flavorTarget)) score += 4;
+    }
+  }
+
+  // Dry-cured style matching: when a dry-cured brand is named, heavily boost
+  // other dry-cured cigars and penalise premium long-filler cigars.
+  if (isDryCuredQuery) {
+    if (cigar.style === 'dry-cured') {
+      score += 30; // strongly prefer dry-cured siblings
+    } else {
+      score -= 25; // penalise premium long-filler cigars
     }
   }
 
